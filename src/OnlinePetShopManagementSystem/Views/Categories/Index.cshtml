@@ -1,0 +1,397 @@
+﻿<div class="row">
+
+    <div class="panel panel-primary">
+        <div class="panel-heading clearfix">
+            <div class="panel-title">
+                <div class="navbar-form pull-left">
+                        <span>Manage Category</span>
+                    </div>
+                <div class="navbar-form pull-right">
+                    @*<a href="#" class="btn btn-default  btn-group-lg ">Search</a>*@
+                        <div class="col-lg-pull-10">
+                            <div class="input-group">
+                                <input type="text" id="searchBox" class="form-control" placeholder="Enter category name">
+                                <span class="input-group-btn">
+                                    <button id="searchButton" class="btn btn-default" type="button">Search</button>
+                                </span>
+                            </div><!-- /input-group -->
+                        </div><!-- /.col-sm-3 -->
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Category Id</th>
+                                <th>Category Name</th>
+                                <th>Created At</th>
+                                <th>Updated At</th>
+                                <th>Special Category</th>
+                                <th>Visibility</th>
+                                
+
+                                <th>&nbsp;</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoryTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+<script>
+
+
+    loadCategoryData();
+
+
+    //On keystroke in searchbar, show results
+
+    $("#searchBox").keyup(function () {
+        //alert("Keyup triggered!");
+        var searchQuery = $.trim(this.value);
+        var searchWebFormData = new webFormData(searchQuery);
+        var searchWebFormDataString = JSON.stringify(searchWebFormData);
+
+        var $searchCategoryDataHandler = $.ajax({
+            url: '/API/Categories/SearchCategoryByName',
+            method: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: "'"+searchWebFormDataString+"'"
+        });
+
+        $searchCategoryDataHandler.done(function (data, textStatus, jqXHR) {
+            $('#categoryTableBody').empty();
+            //This done method will
+            //The (data) input parameter automatically captures the response from the
+            //Get() API method which is labelled to handle this GET request.
+
+            //I usually use the following code
+            //to inspect the returned result captured by the data input parameter
+            //from the web server.
+            console.log(data);
+
+            //After inspecting the data object with the console.log
+            //I have clear picture of the structure and used
+            //the following variable to represent the response.d
+            var categoryList = data;
+            var categoryId = '';
+            var categoryName = '';
+            var createdAt = '';
+            var updatedAt = '';
+            var isSpecial = '';
+            var visibility = '';
+            var $tableElement = null;
+            var $cellElement = null;
+            var $rowElement = null;
+            var $spanElement = null;
+            //-------- Find the table element -----------
+            //I am using the $tableElement variable
+            //to represent the found HTML element which has a matching id of employeeTableBody
+            $tableBodyElement = $('#categoryTableBody');
+
+            //I want to build rows and cells (using tr and td HTML elements) so that
+            //I can display full name, join date, created at, updated at information
+            //within the HTML table element, employeeTableBody. Recall that, I have already asked the
+            //$tableBodyElement variable to represent (reference) the table element.
+
+            //-------- Begin creating <tr> and <td> HTML element ------
+            for (index = 0; index < categoryList.length; index++) {
+                //Set this employee variable to reference an object
+                //inside the employeeList Array.
+                var category = categoryList[index];
+                //Copy out the course information
+                var isSpecialText = '';
+                var visibilityText = '';
+                var labelIndicator = '';
+                categoryId = category.categoryId;
+                categoryName = category.categoryName;
+                createdAt = moment(category.createdAt).format("DD/MM/YYYY HH:MM");
+                updatedAt = moment(category.updatedAt).format("DD/MM/YYYY HH:MM");
+                isSpecial = category.isSpecial;
+                visibility = category.visibility;
+
+                if (isSpecial.toString() == 'true') {
+                    isSpecialText = 'Yes';
+                }
+
+                else {
+                    isSpecialText = 'No';
+                }
+
+                switch (visibility) {
+                    case 0:
+                        visibilityText = 'Always Visible';
+                        labelIndicator = 'label label-success';
+                        break;
+
+                    case 1:
+                        visibilityText = 'Visible (with start and end date)';
+                        labelIndicator = 'label label-primary';
+                        break;
+
+                    case 2:
+                        visibilityText = 'Hidden';
+                        labelIndicator = 'label label-warning';
+                        break;
+
+                }
+
+                //Create new HTML <tr> element.
+                //At the same time let the $rowElement variable to represent it.
+                $rowElement = $('<tr></tr>');
+                //Create the 1st cell element which display Category Id
+                $cellElement = $('<td></td>', { text: categoryId });
+                $rowElement.append($cellElement);
+                //Create the 2nd cell element which display Category Name
+                $cellElement = $('<td></td>', { text: categoryName });
+                $rowElement.append($cellElement);
+                //Create the 3rd cell element which display Created At DateTime
+                $cellElement = $('<td></td>', { text: createdAt });
+                $rowElement.append($cellElement);
+                //Create the 4th cell element which display UpdatedAt DateTime
+                $cellElement = $('<td></td>', { text: updatedAt });
+                $rowElement.append($cellElement);
+                //Create the 5th cell element which display Special Category Status
+                $cellElement = $('<td></td>', { text: isSpecialText });
+                $rowElement.append($cellElement);
+                //Create the 6th cell element which display Visibility
+                $cellElement = $('<td></td>');
+                $spanElement = $('<span></span>', { text: visibilityText });
+                $spanElement.addClass(labelIndicator);
+                $cellElement.append($spanElement);
+                $rowElement.append($cellElement);
+                //---------------- Using jQuery() to create the hyperlink element using the <a></a> --------
+                $hyperLinkElement = $('<a>Update Category</a>').attr('href', '/Categories/Update/' + categoryId);
+                $hyperLinkElement.addClass('btn btn-primary');
+                //The $hyperLinkElement eventually represents (references) a HTML element which is:
+                //<a href="<base url>/Employees/<employee id>" class="btn btn-primary" >Update Employee</a>
+                //-----------------Using jQuery() to creating the 5th cell for the row----------------------
+                $cellElement = $('<td></td>');
+                //-----------------Add the previous created hyperlink element, $hyperLinkElement
+                //                 into the newly created 6th cell.
+                //As a result, $cellElement references an element defined by:
+                //<td><a href="<base url>/Employees/<employee id>" class="btn btn-primary" >Update Employee</a></td>
+                $cellElement.append($hyperLinkElement);
+                $rowElement.append($cellElement);
+                //Create the 7th cell element.
+                //Also, create an additional hyperlink element which will
+                //look like a button due to the Bootstrap class.
+                //This <a> hyperlink element also need to have 1 important feature:
+                //When it is clicked, it will tell the web browser to request for the ManagePhoto
+                //and at the same time pass a QueryString data value of the respective employee id.
+
+                //---------------- Using jQuery() to create the hyperlink element using the <a></a> --------
+                $hyperLinkElement = $('<a>Manage Brand</a>').attr('href', '/Brands/Index/' + categoryId);
+                $hyperLinkElement.addClass('btn btn-primary');
+                //The $hyperLinkElement eventually represents (references) a HTML element which is:
+                //<a href="/Employees/ManagePhoto/<student id>" class="btn btn-primary" >Manage Photo</a>
+                //-----------------Using jQuery() to creating the cell for the row----------------------
+                $cellElement = $('<td></td>');
+                //-----------------Add the previous created hyperlink element, $hyperLinkElement
+                //                 into the newly created cell.
+                //As a result, $cellElement references an element defined by:
+                //<td><a href="/Employees/ManagePhoto/<student id>" class="btn btn-primary" >Manage Photo</a></td>
+                $cellElement.append($hyperLinkElement);
+
+                //---------------Add the new cell into the row represented by the $rowElement
+                $rowElement.append($cellElement);
+                //Insert the $rowElement into the table element represented by $tableBodyElement.
+                $tableBodyElement.append($rowElement);
+                //----End of creating one row to display one employee by using <tr> and <td> HTML element ---
+                //Proceed to the next course object in the employeeList Array.
+            }//end of for loop.
+        }//end of JavaScript anonymous function
+            )//end of the done() method;
+        $searchCategoryDataHandler.fail(function (data, textStatus, jqXHR) {
+            console.log(data);
+            var noResultList = data;
+            var noResultMessage = '';
+            var $tableBodyElement = $('#categoryTableBody');
+
+            $tableBodyElement.empty();
+
+        })//end of $loadEmployeeDataHandler.fail()
+        
+    });
+
+    //Search Query Constructor
+    function webFormData(searchQuery) {
+        this.searchQuery = searchQuery;
+    }
+
+    
+
+    //Load Data Upon Launch
+    function loadCategoryData() {
+        //Note: jQuery.ajax(..) is also often written is $.ajax(..)
+        var $loadCategoryDataHandler = jQuery.ajax({
+            url: '/API/Categories',
+            method: 'GET',
+            dataType: 'json',
+            cache: false
+        });    
+        
+            $loadCategoryDataHandler.done(function (data, textStatus, jqXHR) {
+                //This done method will
+                //The (data) input parameter automatically captures the response from the
+                //Get() API method which is labelled to handle this GET request.
+
+                //I usually use the following code
+                //to inspect the returned result captured by the data input parameter
+                //from the web server.
+                console.log(data);
+
+                //After inspecting the data object with the console.log
+                //I have clear picture of the structure and used
+                //the following variable to represent the response.d
+                var categoryList = data;
+                var categoryId = '';
+                var categoryName = '';
+                var createdAt = '';
+                var updatedAt = '';
+                var isSpecial = '';
+                var visibility = '';
+                var $tableElement = null;
+                var $cellElement = null;
+                var $rowElement = null;
+                var $spanElement = null;
+                //-------- Find the table element -----------
+                //I am using the $tableElement variable
+                //to represent the found HTML element which has a matching id of employeeTableBody
+                $tableBodyElement = $('#categoryTableBody');
+
+                //I want to build rows and cells (using tr and td HTML elements) so that
+                //I can display full name, join date, created at, updated at information
+                //within the HTML table element, employeeTableBody. Recall that, I have already asked the
+                //$tableBodyElement variable to represent (reference) the table element.
+
+                //-------- Begin creating <tr> and <td> HTML element ------
+                for (index = 0; index < categoryList.length; index++) {
+                    //Set this employee variable to reference an object
+                    //inside the employeeList Array.
+                    var category = categoryList[index];
+                    //Copy out the course information
+                    var isSpecialText = '';
+                    var visibilityText = '';
+                    var labelIndicator = '';
+                    categoryId = category.categoryId;
+                    categoryName = category.categoryName;
+                    createdAt = moment(category.createdAt).format("DD/MM/YYYY HH:MM");
+                    updatedAt = moment(category.updatedAt).format("DD/MM/YYYY HH:MM");
+                    isSpecial = category.isSpecial;
+                    visibility = category.visibility;
+
+                    if (isSpecial.toString() == 'true') {
+                        isSpecialText = 'Yes';
+                    }
+
+                    else {
+                        isSpecialText = 'No';
+                    }
+
+                    switch (visibility) {
+                        case 0:
+                            visibilityText = 'Always Visible';
+                            labelIndicator = 'label label-success';
+                            break;
+
+                        case 1:
+                            visibilityText = 'Visible (with start and end date)';
+                            labelIndicator = 'label label-primary';
+                            break;
+
+                        case 2:
+                            visibilityText = 'Hidden';
+                            labelIndicator = 'label label-warning';
+                            break;
+
+                    }
+
+                    //Create new HTML <tr> element.
+                    //At the same time let the $rowElement variable to represent it.
+                    $rowElement = $('<tr></tr>');
+                    //Create the 1st cell element which display Category Id
+                    $cellElement = $('<td></td>', { text: categoryId });
+                    $rowElement.append($cellElement);
+                    //Create the 2nd cell element which display Category Name
+                    $cellElement = $('<td></td>', { text: categoryName });
+                    $rowElement.append($cellElement);
+                    //Create the 3rd cell element which display Created At DateTime
+                    $cellElement = $('<td></td>', { text: createdAt });
+                    $rowElement.append($cellElement);
+                    //Create the 4th cell element which display UpdatedAt DateTime
+                    $cellElement = $('<td></td>', { text: updatedAt });
+                    $rowElement.append($cellElement);
+                    //Create the 5th cell element which display Special Category Status
+                    $cellElement = $('<td></td>', { text: isSpecialText });
+                    $rowElement.append($cellElement);
+                    //Create the 6th cell element which display Visibility
+                    $cellElement = $('<td></td>');
+                    $spanElement = $('<span></span>', { text: visibilityText });
+                    $spanElement.addClass(labelIndicator);
+                    $cellElement.append($spanElement);
+                    $rowElement.append($cellElement);
+                    //---------------- Using jQuery() to create the hyperlink element using the <a></a> --------
+                    $hyperLinkElement = $('<a>Update Category</a>').attr('href', '/Categories/Update/' + categoryId);
+                    $hyperLinkElement.addClass('btn btn-primary');
+                    //The $hyperLinkElement eventually represents (references) a HTML element which is:
+                    //<a href="<base url>/Employees/<employee id>" class="btn btn-primary" >Update Employee</a>
+                    //-----------------Using jQuery() to creating the 5th cell for the row----------------------
+                    $cellElement = $('<td></td>');
+                    //-----------------Add the previous created hyperlink element, $hyperLinkElement
+                    //                 into the newly created 6th cell.
+                    //As a result, $cellElement references an element defined by:
+                    //<td><a href="<base url>/Employees/<employee id>" class="btn btn-primary" >Update Employee</a></td>
+                    $cellElement.append($hyperLinkElement);
+                    $rowElement.append($cellElement);
+                    //Create the 7th cell element.
+                    //Also, create an additional hyperlink element which will
+                    //look like a button due to the Bootstrap class.
+                    //This <a> hyperlink element also need to have 1 important feature:
+                    //When it is clicked, it will tell the web browser to request for the ManagePhoto
+                    //and at the same time pass a QueryString data value of the respective employee id.
+
+                    //---------------- Using jQuery() to create the hyperlink element using the <a></a> --------
+                    $hyperLinkElement = $('<a>Manage Brand</a>').attr('href', '/Brands/Index/' + categoryId);
+                    $hyperLinkElement.addClass('btn btn-primary');
+                    //The $hyperLinkElement eventually represents (references) a HTML element which is:
+                    //<a href="/Employees/ManagePhoto/<student id>" class="btn btn-primary" >Manage Photo</a>
+                    //-----------------Using jQuery() to creating the cell for the row----------------------
+                    $cellElement = $('<td></td>');
+                    //-----------------Add the previous created hyperlink element, $hyperLinkElement
+                    //                 into the newly created cell.
+                    //As a result, $cellElement references an element defined by:
+                    //<td><a href="/Employees/ManagePhoto/<student id>" class="btn btn-primary" >Manage Photo</a></td>
+                    $cellElement.append($hyperLinkElement);
+
+                    //---------------Add the new cell into the row represented by the $rowElement
+                    $rowElement.append($cellElement);
+                    //Insert the $rowElement into the table element represented by $tableBodyElement.
+                    $tableBodyElement.append($rowElement);
+                    //----End of creating one row to display one employee by using <tr> and <td> HTML element ---
+                    //Proceed to the next course object in the employeeList Array.
+                }//end of for loop.
+            }//end of JavaScript anonymous function
+            )//end of the done() method;
+            $loadCategoryDataHandler.fail(function (data, textStatus, jqXHR) {
+                noty({
+                    //text: 'Ajax call has failed due to : ' + data.statusText, type: 'error',
+                    text: 'Ajax call has failed due to : ' + data.statusText, type: 'error',
+                    layout: 'center',
+                    template: '<div class="noty_message"><span class="noty_text"></span>'
+                });//end of noty()
+            })//end of $loadEmployeeDataHandler.fail()
+        }//end of loadEmployeeData();
+    
+</script>
+    }

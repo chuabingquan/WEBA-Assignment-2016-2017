@@ -1,0 +1,168 @@
+﻿<div class="container">
+    <div class="col-md-offset-2 col-md-8">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="panel-title">Update Employee Record</div>
+            </div>
+            <div class="panel-body">
+                <form id="dataForm" role="form" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="fullNameInput">Full Name</label>
+                        <div class="col-md-4">
+                            <input type="text" id="fullNameInput" class="form-control input-group-sm"
+                                   maxlength="50" placeholder="Full name" value="" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3" >Photo</label>
+                        <div class="col-md-4">
+                            <img id="currentPhotoImage"  />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="dainDateInput">Join Date</label>
+                        <div class="col-md-7">
+                            <input type="text" id="joinDateInput" class="form-control input-group-sm"
+                                   placeholder="Join Date" value="" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3"></label>
+                        <div class="col-md-9">
+                            <div class="pull-right">
+																<a class="btn btn-default" asp-action="Index" asp-controler="Employees">Cancel</a>
+																<input type="button" class="btn btn-danger" value="Delete" id="deleteButton" />
+                                <input type="button" class="btn btn-primary" value="Save" id="saveButton" />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div><!-- end of div element which has the class="panel-body" -->
+        </div><!-- end of the div element which has the class="panel" -->
+    </div><!-- end of the div element which has class="col-md-offset-2 col-md-8" -->
+</div><!-- end of div element which has the class="container" -->
+<button class="btn" id="checkNumberOfFilesButton" >Test</button>
+@section scripts{
+<link href="~/lib/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet" />
+<script src="~/lib/bootstrap-fileinput/js/fileinput.min.js"></script>
+		<script>
+		//------------------------------------ Client-side Load Data logic -----------------------------------
+				window.employeeId = getIdFromAddressBar();
+				window.$photoInputElement = $('#fileinput');
+    function getIdFromAddressBar() {
+        var urlArray = window.location.href.split('/');
+        var id = urlArray[urlArray.length - 1];
+        return id;
+    };
+
+    //Note: jQuery.ajax(..) is also often written is $.ajax(..)
+    $loadEmployeeHandler = jQuery.ajax({
+        type: 'GET',
+        url: '/API/Employees/' + window.employeeId,
+    })
+    $loadEmployeeHandler.done(function (data, textStatus, jqXHR) {
+
+        //After inspecting the data object with the console.log
+        //I have clear picture of the structure and used
+        //the following variable to reference(represent) the data variable.
+        var employee = data;
+        //Copy out the employee information
+        var fullName = employee.fullName;
+        var joinDate = moment(new Date(employee.joinDate)).format("DD/MM/YYYY");
+        var imageUrl = employee.imageUrl;
+
+        //Populate the respective input controls with the employee details.
+        //For example, find the text input control, fullNameInput and set the 
+        //text input control's value with the fullName variable's content.
+        $('#fullNameInput').val(fullName);
+        $('#joinDateInput').val(joinDate);
+        $('#currentPhotoImage').attr('src', imageUrl);
+    }//end of JavaScript anonymous function
+		)//end of the done() method;
+
+		//------------------------------------ Client-side Load Data logic ---(End)---------------------------
+
+
+    //----------------------------------------- Client-side Update logic --------------------------------
+    $('#saveButton').on('click', function () {
+    		//Collect data from input elements
+    		var collectedFullName = $('#fullNameInput').val();
+    		var collectedJoinDate = $('#joinDateInput').val();
+
+    		var webFormData = new WebFormData(collectedFullName,
+						collectedJoinDate);
+    		var webFormDataInString = JSON.stringify(webFormData);
+    		$saveEmployeeHandler = jQuery.ajax({
+    				method: 'PUT',
+    				contentType: 'application/json',
+    				url: '/Api/Employees/' + window.employeeId,
+    				data: "'" + webFormDataInString + "'"
+    		});
+    		$saveEmployeeHandler.done(function (data, textStatus, jqXHR) {
+    				noty({
+    						text: data.message,
+    						type: 'success',
+    						layout: 'center',
+    						template: '<div class="noty_message"><span class="noty_text"></span>'
+    				});
+    		});
+    		$saveEmployeeHandler.fail(function (data, textStatus, jqXHR) {
+    				noty({
+    						text: data.message,
+    						type: 'error',
+    						layout: 'center',
+    						template: '<div class="noty_message"><span class="noty_text"></span>'
+    				});
+    		});
+    });
+	//End of $('#saveButton').on('click', function () {
+		
+		//Define the object constructor, WebFormData which you can create
+		//a suitable object of information which is needed by the Web API Post() method
+		function WebFormData(inFullName, inJoinDate) {
+				this.fullName = inFullName;
+				this.joinDate = inJoinDate;
+		}
+		//----------------------------------------- Client-Side Update logic ---(End)-------------------------------------
+
+		//----------------------------------------- Client-side Delete logic -------------------------------------------------
+		$('#deleteButton').on('click', function () {
+				$deleteEmployeeHandler = jQuery.ajax({
+						type: 'DELETE',
+						url: '/API/Employees/' + window.employeeId
+				})//end of jQuery.ajax() call
+				$deleteEmployeeHandler.done(function (data, textStatus, jqXHR) {
+						noty({
+								text: data.message, type: 'success',
+								layout: 'center',
+								template: '<div class="noty_message" style="height:50px;"><span class="noty_text"></span>',
+								buttons: [
+										{
+												addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+														$noty.close();
+														$('body').fadeOut(2000, redirectPage);
+												}
+										}
+								]
+						});//end of noty()
+				});//end of $deleteEmployeeHandler.done()
+
+				$deleteEmployeeHandler.fail(function (data, textStatus, jqXHR) {
+						console.log(data);
+						noty({
+								text: data.responseJSON.message, type: 'error',
+								layout: 'center',
+								template: '<div class="noty_message"><span class="noty_text"></span>'
+						});//end of noty()
+				});//end of $deleteEmployeeHandler.fail()
+
+		});// end of $('#deleteButton').on('click', function () { ...}
+
+		function redirectPage() {
+				location.replace('/Employees/Index');
+		}// end of redirectPage() method (function)
+	 //----------------------------------------- Client-side Delete logic -(End)-------------------------------------------
+
+
+</script>
+}

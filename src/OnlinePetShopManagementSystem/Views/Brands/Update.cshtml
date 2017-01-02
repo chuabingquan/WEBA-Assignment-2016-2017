@@ -1,0 +1,275 @@
+﻿<div class="container">
+    <div class="col-md-offset-2 col-md-8">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="panel-title">Update Brand Record</div>
+            </div>
+            <div class="panel-body">
+                <form id="dataForm" role="form" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="brandNameInput">Brand Name</label>
+                        <div class="col-md-4">
+                            <input type="text" id="brandNameInput" class="form-control input-group-sm"
+                                   maxlength="50" placeholder="Brand name" value="" />
+                        </div>
+                    </div>
+  
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="brandPhotoUploadInput">Photo</label>
+                        <div class="col-md-9">
+                            <input id="fileInput" name="fileInput" type="file" class="file input-group-lg" multiple />
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="categoryIdInput">Category</label>
+                        <div class="col-md-7">
+                            <select id="categoryDropdownCB" class="form-control input-group-sm" multiple="multiple">
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3"></label>
+                        <div class="col-md-9">
+                            <div class="pull-right">
+                                <a class="btn btn-default" asp-action="Index" asp-controler="Brands">Cancel</a>
+                                <input type="button" class="btn btn-danger" value="Delete" id="deleteButton" />
+                                <input type="button" class="btn btn-primary" value="Save" id="saveButton" />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div><!-- end of div element which has the class="panel-body" -->
+        </div><!-- end of the div element which has the class="panel" -->
+    </div><!-- end of the div element which has class="col-md-offset-2 col-md-8" -->
+</div><!-- end of div element which has the class="container" -->
+<button class="btn" id="checkNumberOfFilesButton">Test</button>
+@section scripts{
+    <link href="~/lib/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet" />
+    <script src="~/lib/bootstrap-fileinput/js/fileinput.min.js"></script>
+
+
+    <script>
+        //------------------------------------ Client-side Load Data logic -----------------------------------
+
+        //Invoke to populate categories Dropdown control
+        setupCategoriesDropdown();
+
+        //Invoke to retrieve brandId from url
+        window.brandId = getIdFromAddressBar();
+
+        //Declarations
+        var $categoryDropdownCB = null;
+        var categoryList = null;
+        var brandPhotoUrl = 'test';
+        window.$photoInputElement = $('#fileinput');
+
+ 
+
+
+    //Get id from address
+    function getIdFromAddressBar() {
+        var urlArray = window.location.href.split('/');
+        var id = urlArray[urlArray.length - 1];
+        return id;
+    };
+
+    //Setup Categories Dropdown, make silent communication to retrieve category list and populate dropdown
+    function setupCategoriesDropdown() {
+        var $loadCategoriesDataHandler = $.ajax({
+            url: '/API/Categories/GetCategoriesForControls',
+            method: 'GET',
+            dataType: 'json',
+            cache: false
+        });
+
+        $loadCategoriesDataHandler.done(function (data, textStatus, jqXHR) {
+            categoryList = data;
+            var categoryName = '';
+            var categoryId = '';
+            var $optionElement = null;
+
+            $categoryDropdownCB = $('#categoryDropdownCB');
+
+
+            for (i = 0; i < categoryList.length; i++) {
+
+                var category = categoryList[i];
+                categoryId = category.categoryId;
+                categoryName = category.categoryName;
+
+                $optionElement = $('<option></option>', { text: categoryName });
+                $optionElement.attr('value', categoryId);
+                $categoryDropdownCB.append($optionElement);
+            }
+
+            $categoryDropdownCB.multiselect({
+                disableIfEmpty: true
+            });
+        });
+    };
+
+        //Create network listener to make silent communication to get Brand Information for current ID
+        var $loadBrandHandler = jQuery.ajax({
+            type: 'GET',
+            url: '/API/Brands/' + window.brandId,
+        });
+
+        //Retrieve Brand information for updating purpose and populate update brand web form
+        $loadBrandHandler.done(function (data, textStatus, jqXHR) {
+
+            var brand = data;
+            var brandId = brand.brandId;
+            var brandName = brand.brandName;
+            brandPhotoUrl = brand.brandPhotoUrl;
+            //alert(brandPhotoUrl);
+            var alreadySelectedCategoryId = '';
+            var category = brand.category;
+
+            //Logic to preselect existing categories to be reflected on the categories dropdown
+            for (i = 0; i < category.length; i++) {
+                var alreadySelectedCategories = category[i];
+                alreadySelectedCategoryId = alreadySelectedCategories.categoryId;
+
+                for (j = 0; j < categoryList.length; j++) {
+                    if (alreadySelectedCategoryId == categoryList[j].categoryId) {
+                        $categoryDropdownCB.multiselect('select', categoryList[j].categoryId);
+                        $categoryDropdownCB.multiselect('refresh');
+                    }
+                }
+            }
+
+            $('#brandNameInput').val(brandName);
+            $('#currentBrandPhotoImage').attr('src', brandPhotoUrl);
+        }//end of function to retrieve data and populate webform
+            );//end of the done() method;
+    
+
+        //Upload Binary File Image logic
+
+        window.webFormData = null;
+        window.$brandPhotoInputElement = $('#fileInput');
+
+        var footerTemplate = '<div class="file-thumbnail-footer">\n' +
+        '    <div class="file-caption-name" style="width:{width}">{caption}</div>\n' +
+        '    {actions}\n' +
+        '</div>';
+        var actionTemplate = '<div class="file-actions">\n' +
+         '       <div class="file-footer-buttons">\n {delete} </div>\n' +
+         '    <div class="file-upload-indicator" tabindex="-1" title="{indicatorTitle}">{indicator}</div>\n' +
+         '    <div class="clearfix"></div>\n' +
+         '</div>';
+
+        //alert(brandPhotoUrl);
+
+        $('#fileInput').fileinput({
+            previewFileType: 'image',
+            allowedFileTypes: ['image'],
+            uploadUrl: '/API/Brands/SaveBrandDataAndPhoto',
+            uploadAsync: false,
+            maxFileCount: 1,
+            layoutTemplates: { footer: footerTemplate, actions: actionTemplate },
+            type: 'post',
+            msgInvalidFileType: 'Invalid type for file "{name}". Only "{types}" files are supported.',
+            autoReplace: true,/*http://plugins.krajee.com/file-auto-replace-demo*/
+            overwriteInitial: false,
+            showUploadedThumbs: false,
+            showUpload: false,
+            showRemove: false,
+            browseClass: 'btn btn-primary btn-md pull-right',
+            previewFileIcon: '<i class="glyphicon glyphicon-king"></i>',
+            allowedFileExtensions: ['jpg', 'jpeg', 'png'],
+            uploadExtraData: function () {
+                return window.webFormData;
+            }
+        });
+		//------------------------------------ Client-side Load Data logic ---(End)---------------------------
+
+
+    //----------------------------------------- Client-side Update logic --------------------------------
+    $('#saveButton').on('click', function () {
+    		//Collect data from input elements
+    		var collectedFullName = $('#fullNameInput').val();
+    		var collectedJoinDate = $('#joinDateInput').val();
+
+    		var webFormData = new WebFormData(collectedFullName,
+						collectedJoinDate);
+    		var webFormDataInString = JSON.stringify(webFormData);
+    		$saveEmployeeHandler = jQuery.ajax({
+    				method: 'PUT',
+    				contentType: 'application/json',
+    				url: '/Api/Employees/' + window.employeeId,
+    				data: "'" + webFormDataInString + "'"
+    		});
+    		$saveEmployeeHandler.done(function (data, textStatus, jqXHR) {
+    				noty({
+    						text: data.message,
+    						type: 'success',
+    						layout: 'center',
+    						template: '<div class="noty_message"><span class="noty_text"></span>'
+    				});
+    		});
+    		$saveEmployeeHandler.fail(function (data, textStatus, jqXHR) {
+    				noty({
+    						text: data.message,
+    						type: 'error',
+    						layout: 'center',
+    						template: '<div class="noty_message"><span class="noty_text"></span>'
+    				});
+    		});
+    });
+	//End of $('#saveButton').on('click', function () {
+
+		//Define the object constructor, WebFormData which you can create
+		//a suitable object of information which is needed by the Web API Post() method
+		function WebFormData(inFullName, inJoinDate) {
+				this.fullName = inFullName;
+				this.joinDate = inJoinDate;
+		}
+		//----------------------------------------- Client-Side Update logic ---(End)-------------------------------------
+
+		//----------------------------------------- Client-side Delete logic -------------------------------------------------
+		$('#deleteButton').on('click', function () {
+				$deleteEmployeeHandler = jQuery.ajax({
+						type: 'DELETE',
+						url: '/API/Employees/' + window.employeeId
+				})//end of jQuery.ajax() call
+				$deleteEmployeeHandler.done(function (data, textStatus, jqXHR) {
+						noty({
+								text: data.message, type: 'success',
+								layout: 'center',
+								template: '<div class="noty_message" style="height:50px;"><span class="noty_text"></span>',
+								buttons: [
+										{
+												addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+														$noty.close();
+														$('body').fadeOut(2000, redirectPage);
+												}
+										}
+								]
+						});//end of noty()
+				});//end of $deleteEmployeeHandler.done()
+
+				$deleteEmployeeHandler.fail(function (data, textStatus, jqXHR) {
+						console.log(data);
+						noty({
+								text: data.responseJSON.message, type: 'error',
+								layout: 'center',
+								template: '<div class="noty_message"><span class="noty_text"></span>'
+						});//end of noty()
+				});//end of $deleteEmployeeHandler.fail()
+
+		});// end of $('#deleteButton').on('click', function () { ...}
+
+		function redirectPage() {
+				location.replace('/Employees/Index');
+		}// end of redirectPage() method (function)
+	 //----------------------------------------- Client-side Delete logic -(End)-------------------------------------------
+
+
+    </script>
+}

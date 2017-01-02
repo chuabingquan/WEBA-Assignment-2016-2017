@@ -1,0 +1,389 @@
+﻿<div class="container">
+    <div class="col-md-offset-2 col-md-8">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="panel-title">Update Category Record</div>
+            </div>
+            <div class="panel-body">
+                <form id="dataForm" role="form" data-toggle="validator" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="categoryNameInput">Category Name</label>
+                        <div class="col-md-7">
+                            <input type="text" id="categoryNameInput" class="form-control input-group-sm"
+                                   maxlength="50" placeholder="Category Name" value="" data-error="Please enter a category name!" required data-validate="true" />
+                            <div class="help-block with-errors"></div>
+                            <!--<br>-->
+                            <span class="text-muted">Category name allows you to group products by similar attributes. All text are converted to uppercase after save.</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="visibilityInput">Visibility</label>
+                        <div class="col-md-7" id="radioContainer">
+                            <input type="radio" class="visibilityOption" name="visibilityOption" value="0" checked required data-validate="true" /> Visible (ignore start and end date)<br>
+                            <input type="radio" class="visibilityOption" name="visibilityOption" value="1" required data-validate="true" /> Visible (with start and end date)<br>
+                            <input type="radio" class="visibilityOption" name="visibilityOption" value="2" required data-validate="true" /> Hidden
+                        </div>
+                    </div>
+
+
+                    <div class="form-group" id="dateRangeDiv" hidden>
+                        <label class="control-label col-md-3" for="dateRangeInput">Date Range</label>
+                        <div class="col-md-7" id="dateRangeContainer">
+                            <span class="text-muted">Pick a date range for your starting and ending dates.</span>
+                            <input type="text" name="dateRange" value="" placeholder="" data-validate="false" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="isSpecialInput">Special Category</label>
+                        <div class="col-md-7">
+                            <input type="checkbox" id="isSpecialInput" value="true" data-validate="false" />
+                            <span class="text-muted">A special category is directly linked to products (e.g. Festives Sales).</span>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3"></label>
+                        <div class="col-md-9">
+                            <div class="pull-left">
+                                <button type="button" class="btn btn-danger" value="Delete" id="deleteButton">Delete</button>
+                            </div>
+                            <div class="pull-right">
+                                <a class="btn btn-default" asp-action="Index" asp-controler="Categories">Cancel</a>
+                                <button type="button" class="btn btn-primary" value="Update" id="updateButton">Update</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div><!-- end of div element which has the class="panel-body" -->
+        </div><!-- end of the div element which has the class="panel" -->
+    </div><!-- end of the div element which has class="col-md-offset-2 col-md-8" -->
+</div><!-- end of div element which has the class="container" -->
+@section scripts{
+    <script>
+
+        /*<------------------------------------  GET CATEGORY ------------------------------------>*/
+
+        //Declarations
+        var existingStartDate = '';
+        var existingEndDate = '';
+        var startDate = '';
+        var endDate = '';
+
+        //Get current date
+        var currentDate = moment().format('DD/MM/YYYY');
+        //alert('current date is: ' + currentDate);
+
+        //Invoke to retrieve brandId from url
+        window.categoryId = getIdFromAddressBar();
+
+        //Get id from address
+        function getIdFromAddressBar() {
+            var urlArray = window.location.href.split('/');
+            var id = urlArray[urlArray.length - 1];
+            return id;
+        };
+
+
+        //Create network listener to make silent communication to get Category Information for current ID
+        var $loadCategoryHandler = jQuery.ajax({
+            type: 'GET',
+            url: '/API/Categories/' + window.categoryId,
+        });
+
+        //Retrieve Brand information for updating purpose and populate update brand web form
+        $loadCategoryHandler.done(function (data, textStatus, jqXHR) {
+
+            var category = data;
+            var categoryId = category.categoryId;
+            var categoryName = category.categoryName;
+            //alert(categoryName);
+            var visibility = category.visibility;
+            //alert(visibility);
+            existingStartDate = category.startDate;
+            //alert(existingStartDate);
+            existingEndDate = category.endDate;
+            //alert(existingEndDate);
+            var isSpecial = category.isSpecial;
+            //alert(isSpecial);
+            var visibilityRadios = $('input[name=visibilityOption]');
+
+
+            //Log loaded category details
+            console.log('Category Details Loaded: ');
+            console.log(categoryId);
+            console.log(categoryName);
+            console.log(visibility);
+            console.log(existingStartDate);
+            console.log(existingEndDate);
+            console.log(isSpecial);
+            
+
+            //Enter category name into categoryNameInput field
+            $('#categoryNameInput').val(categoryName);
+
+            //alert(visibilityRadios.length);
+
+            //Determine visibility option and check it
+            visibilityRadios.each(function () {
+                //alert($(this).val());
+                var radioValue = $(this).val();
+                    if(visibility.toString() == radioValue){
+                        $(this).attr('checked', 'true');
+                    }
+            });
+
+            //Determine whether start date is null
+            if ((existingStartDate && existingEndDate) == null) {
+                startDate = currentDate;
+                endDate = currentDate;
+            }
+
+            else {
+                existingStartDate = moment(existingStartDate).format('DD/MM/YYYY');
+                startDate = existingStartDate;
+                //alert(startDate);
+                existingEndDate = moment(existingEndDate).format('DD/MM/YYYY');
+                endDate = existingEndDate;
+                //alert(endDate);
+            }
+
+            //Determine if there is existing special categories
+            if(isSpecial.toString() == 'true'){
+                $('#isSpecialInput').attr('checked', 'true');
+            }
+
+
+            //Set dateRangePicker settings
+            $('input[name="dateRange"]').daterangepicker(
+            {
+                locale: {
+                    format: 'DD/MM/YYYY'
+                },
+                autoApply: true,
+                minDate: currentDate,
+                startDate: startDate,
+                endDate: endDate
+            },
+            function (start, end) {
+                //alert('IN daterangepickersettings');
+                startDate = start.format('DD/MM/YYYY');
+                endDate = end.format('DD/MM/YYYY');
+            });
+
+
+            //Display/hide date range picker based on visibility choice
+            //alert(visibility + "is checked");
+            //alert('Radio date hide/show triggered IN');
+            if (visibility == 0 || visibility == 2) {
+                $('#dateRangeDiv').hide();
+                startDate = '';
+                endDate = '';
+            }
+            else {
+                $('#dateRangeDiv').show();
+            }
+
+        }//end of function to retrieve data and populate webform
+            );//end of the done() method;
+
+
+
+
+        //After loading Hide DateRangePicker based on radio button choice
+        var eventChange = 'change';
+        $(document).ready(function() {
+            //alert('Radio date hide/show triggered OUT');
+            $('input[name=visibilityOption]').on('change', function () {
+
+                var visibilityOptionChecked = $(this).val();
+                //alert(visibilityOptionChecked + "is checked");
+                if (visibilityOptionChecked == 0 || visibilityOptionChecked == 2) {
+                    $('#dateRangeDiv').hide();
+                    //startDate = currentDate;
+                    //endDate = currentDate;
+                }
+                else {
+                    $('#dateRangeDiv').show();
+                }
+            });
+        });
+
+
+
+        /*<------------------------------------  UPDATE CATEGORY ------------------------------------>*/
+
+        //WebFormData constructor
+        function WebFormData(inCategoryName, inVisibilityOption, inStartDate, inEndDate, inIsSpecial) {
+            this.categoryName = inCategoryName;
+            this.visibility = inVisibilityOption;
+            this.startDate = inStartDate;
+            this.endDate = inEndDate;
+            this.isSpecial = inIsSpecial;
+        };
+
+
+        //save button clicked
+        $('#updateButton').on('click', function () {
+                var collectedCategoryName = $('#categoryNameInput').val().toUpperCase();
+                //alert(collectedCategoryName);
+                var collectedVisibilityOption = $('input[name=visibilityOption]:checked').val();
+                //alert(collectedVisibilityOption);
+                var collectedStartDate = startDate;
+                //alert(collectedStartDate);
+                var collectedEndDate = endDate;
+                //alert(collectedEndDate);
+
+                if (!(collectedVisibilityOption == '1')) {
+                    //alert('User did not pick date, dates will be removed from json');
+                    collectedStartDate = '';
+                    collectedEndDate = '';
+                }
+
+                else if (collectedVisibilityOption == '1' && startDate == '' && endDate == '') {
+                    //alert('User selected daterange option but did not apply. Updating means value shown, aka today default');
+                    collectedStartDate = currentDate;
+                    collectedEndDate = currentDate;
+                }
+
+                var collectedIsSpecial = $('#isSpecialInput:checked').val();
+
+                if (collectedIsSpecial == "" || collectedIsSpecial == null) {
+                    collectedIsSpecial = 'false';
+                }
+
+                //alert(collectedIsSpecial);
+
+                var updatedCategoryData = new WebFormData(collectedCategoryName, collectedVisibilityOption, collectedStartDate, collectedEndDate, collectedIsSpecial);
+                //alert(newCategoryData.categoryName);
+                //alert(newCategoryData.visibility);
+                //alert(newCategoryData.startDate);
+                //alert(newCategoryData.endDate);
+                //alert(newCategoryData.isSpecial);
+
+                var updatedCategoryDataString = JSON.stringify(updatedCategoryData);
+
+                console.log('Updated JSON to be sent to Categories PUT Web API'+updatedCategoryDataString);
+
+                var $updateCategoryHandler = $.ajax({
+                    type: 'PUT',
+                    url: '/API/Categories/' + window.categoryId,
+                    dataType: 'json',
+                    contentType: 'application/json;',
+                    data: "'" + updatedCategoryDataString + "'"
+                });
+
+                $updateCategoryHandler.done(function (data, textStatus, jqXHR) {
+                    noty({
+                        text: data.message,
+                        type: 'success',
+                        layout: 'center',
+                        template: '<div class = "noty_message" style = "height:50px;"><span class = "noty_text"></span>',
+                        buttons: [
+                            {
+                                addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+                                    $noty.close();
+                                    $('body').fadeOut(2000, redirectPage);
+                                }
+                            }
+                        ]
+                    });//end of Noty
+                });//End of $addCategoryHandler.done()
+
+                $updateCategoryHandler.fail(function (data, textStatus, jqXHR) {
+                    noty({
+                        text: data.responseJSON.message,
+                        type: 'error',
+                        layout: 'center',
+                        template: '<div class="noty_message"><span class="noty_text"></span>'
+                    });//End of noty
+                });//End of $addCategoryHandler.fail()
+        });//End of $('#saveButton').on('click', anonymous function)
+
+
+        //Disable/Enable Save button based on validation
+        var $dataForm = $('#dataForm');
+        var $categoryInput = $('#categoryNameInput');
+        var $updateButtonForMod = $('#updateButton');
+        var attr = $updateButtonForMod.attr('disabled');
+
+
+        $dataForm.on('valid.bs.validator', function (e) {
+            console.log(e.relatedTarget);
+
+            if (e.relatedTarget.id === 'categoryNameInput') {
+
+                //if (typeof attr !== typeof undefined && attr !== false) {
+
+                    if ($categoryInput.val() != '' || $categoryInput.val() != null) {
+                        console.log('in second if of valid!');
+                        $updateButtonForMod.removeAttr('disabled');
+                        console.log('Button enabled');
+                    }
+                }
+            //}
+        });
+
+        $dataForm.on('invalid.bs.validator', function (e) {
+            console.log(e.relatedTarget);
+
+            if (e.relatedTarget.id === 'categoryNameInput') {
+                    console.log('TAKE NOTE');
+                    if ($categoryInput.val() != '' || $categoryInput.val() != null) {
+                        console.log('in second if of invalid!');
+                        $updateButtonForMod.attr('disabled', 'true');
+                        console.log('Button disabled');
+                    }
+                }
+        });
+
+
+
+        /*<------------------------------------  DELETE CATEGORY ------------------------------------>*/
+
+        $('#deleteButton').on('click', function () {
+
+            var $deleteCategoryHandler = $.ajax({
+                type: 'DELETE',
+                url: '/API/Categories/' + window.categoryId
+            });//End of delete ajax call
+
+            $deleteCategoryHandler.done(function (data, textStatus, jqXHR) {
+                noty({
+                    text: data.message,
+                    type: 'success',
+                    layout: 'center',
+                    template: '<div class = "noty_message" style = "height:50px;"><span class = "noty_text"></span>',
+                    buttons: [
+                        {
+                            addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+                                $noty.close();
+                                $('body').fadeOut(2000, redirectPage);
+                             }
+                        }
+                    ]
+                });// End of noty
+            });//End of deleteCategoryHandler.done()
+
+
+            $deleteCategoryHandler.fail(function (data, textStatus, jqXHR) {
+                console.log(data);
+                noty({
+                    text: data.responseJSON.message,
+                    type: 'error',
+                    layout: 'center',
+                    template: '<div class = "noty_message"><span class = "noty_text"></span>'
+                });//End of noty
+            });//End of deleteCategoryHandler.fail()
+
+        });//End of delete button click
+
+        function redirectPage() {
+            location.replace('/Categories/Index');
+        };
+
+
+    </script>
+
+}

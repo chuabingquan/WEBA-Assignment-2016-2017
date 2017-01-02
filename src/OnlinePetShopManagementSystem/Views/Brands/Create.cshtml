@@ -1,0 +1,204 @@
+﻿<div class="container">
+    <div class="col-md-offset-2 col-md-8">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="panel-title">Create Brand Record</div>
+            </div>
+            <div class="panel-body">
+                <form id="dataForm" role="form" class="form-horizontal">
+
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="brandNameInput">Brand Name</label>
+                        <div class="col-md-4">
+                            <input type="text" id="brandNameInput" class="form-control input-group-sm"
+                                   maxlength="50" placeholder="Brand name" value="" />
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="categoryIdInput">Category</label>
+                        <div class="col-md-7">
+                            <select id="categoryDropdownCB" class="form-control input-group-sm" multiple="multiple"></select>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="brandPhotoUploadInput">Photo</label>
+                        <div class="col-md-9">
+                            <input id="fileInput" name="fileInput" type="file" class="file input-group-lg" multiple />
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3"></label>
+                        <div class="col-md-9">
+                            <div class="pull-right">
+                                <a class="btn btn-default" asp-action="Index" asp-controler="Brands">Cancel</a>
+                                <input type="button" class="btn btn-primary" value="Save" id="saveButton" />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div><!-- end of div element which has the class="panel-body" -->
+        </div><!-- end of the div element which has the class="panel" -->
+    </div><!-- end of the div element which has class="col-md-offset-2 col-md-8" -->
+</div><!-- end of div element which has the class="container" -->
+
+@section scripts{
+
+    <link href="~/lib/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet" />
+    <script src="~/lib/bootstrap-fileinput/js/fileinput.min.js"></script>
+    <script>
+
+        //Invoke to populate categories Dropdown control
+        setupCategoriesDropdown();
+
+
+        //Declarations
+		window.webFormData = null;
+		window.$brandPhotoInputElement = $('#fileInput');
+
+
+		//Setup Categories Dropdown, make silent communication to retrieve category list and populate dropdown
+		function setupCategoriesDropdown() {
+		    var $loadCategoriesDataHandler = $.ajax({
+		        url: '/API/Categories/GetCategoriesForControls',
+		        method: 'GET',
+		        dataType: 'json',
+		        cache: false
+		    });
+
+		    $loadCategoriesDataHandler.done(function (data, textStatus, jqXHR) {
+		        categoryList = data;
+		        var categoryName = '';
+		        var categoryId = '';
+		        var $optionElement = null;
+
+		        $categoryDropdownCB = $('#categoryDropdownCB');
+
+
+		        for (i = 0; i < categoryList.length; i++) {
+
+		            var category = categoryList[i];
+		            categoryId = category.categoryId;
+		            categoryName = category.categoryName;
+
+		            $optionElement = $('<option></option>', { text: categoryName });
+		            $optionElement.attr('value', categoryId);
+		            $optionElement.addClass('categoryOption');
+		            $categoryDropdownCB.append($optionElement);
+		        }
+
+		        $categoryDropdownCB.multiselect({
+		            disableIfEmpty: true
+		        });
+		    });
+		};
+
+
+
+		var footerTemplate = '<div class="file-thumbnail-footer">\n' +
+        '    <div class="file-caption-name" style="width:{width}">{caption}</div>\n' +
+        '    {actions}\n' +
+        '</div>';
+   	   var actionTemplate = '<div class="file-actions">\n' +
+        '       <div class="file-footer-buttons">\n {delete} </div>\n' +
+        '    <div class="file-upload-indicator" tabindex="-1" title="{indicatorTitle}">{indicator}</div>\n' +
+        '    <div class="clearfix"></div>\n' +
+        '</div>';
+
+
+		$('#fileInput').fileinput({
+		    previewFileType: 'image',
+		    allowedFileTypes: ['image'],
+		    uploadUrl: '/API/Brands/SaveBrandDataAndPhoto',
+        uploadAsync: false,
+        maxFileCount: 1,
+        layoutTemplates: { footer: footerTemplate, actions: actionTemplate },
+        type: 'post',
+        msgInvalidFileType: 'Invalid type for file "{name}". Only "{types}" files are supported.',
+        autoReplace: true,/*http://plugins.krajee.com/file-auto-replace-demo*/
+        overwriteInitial: false,
+        showUploadedThumbs: false,
+        showUpload: false,
+        showRemove: false,
+        browseClass: 'btn btn-primary btn-md pull-right',
+        previewFileIcon: '<i class="glyphicon glyphicon-king"></i>',
+        allowedFileExtensions : ['jpg', 'jpeg','png'],
+        uploadExtraData: function () {
+        		return window.webFormData;
+        }
+    });
+		window.$brandPhotoInputElement.on('filebatchuploadsuccess',
+		             function (event, data, previewId, index) {
+        var form = data.form, files = data.files, extra = data.extra,
+            response = data.response, reader = data.reader;
+        console.log(data.Message);
+        console.log(event);
+        console.dir(data);
+        noty({
+        		text: data.jqXHR.responseJSON.message,
+            type: 'success',
+            layout: 'center',
+            template: '<div class = "noty_message" style = "height:50px;"><span class = "noty_text"></span>',
+            buttons: [
+            {
+                addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+                    $noty.close();
+                    $('body').fadeOut(2000, redirectPage);
+                }
+            }
+        ]
+    });
+});
+
+
+
+        //Save brand data logic
+		$('#saveButton').on('click', function () {
+		    //Collect data from input elements
+		    var collectedBrandName = $('#brandNameInput').val();
+		    var collectedCategories = [];
+
+
+            //Get all checked categories
+		    $(".categoryOption:selected").each(function () {
+		        var category = {};
+		        category.categoryId = this.value;
+		        collectedCategories.push(category);
+		    });
+
+            //Old get all checked categories
+		    //$('.categoryOption:checked').each(function () {
+		    //    var category = {};
+		    //    category.categoryId = parseInt($(this).val());
+		    //    collectedCategories.push(category);
+		    //});
+
+		    console.log('New brand details to be added: ');
+		    console.log(collectedBrandName);
+
+		    for (i = 0; i < collectedCategories.length; i++)
+		    {
+		        var categorySelected = collectedCategories[i];
+		        console.log("Checkbox selected: " + categorySelected.categoryName + ', ' + categorySelected.categoryId);
+		    }
+
+		    collectedCategoriesString = JSON.stringify(collectedCategories);
+		    window.webFormData = new WebFormData(collectedBrandName, collectedCategoriesString);
+		    window.$brandPhotoInputElement.fileinput('upload');
+
+		});
+		//Define the object constructor, WebFormData which you can create
+		//a suitable object of information which is needed by the Web API Post() method
+		function WebFormData(inBrandName, inCategories) {
+				this.BrandName = inBrandName;
+				this.selectedAssociatedCat = inCategories;
+		}
+
+    </script>
+} 

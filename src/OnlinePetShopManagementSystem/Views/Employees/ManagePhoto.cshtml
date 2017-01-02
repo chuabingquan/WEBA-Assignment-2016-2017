@@ -1,0 +1,162 @@
+﻿<div class="container">
+    <div class="col-md-offset-2 col-md-8">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="panel-title">Update Employee Photo</div>
+            </div>
+            <div class="panel-body">
+                <form id="dataForm" role="form" class="form-horizontal">
+										<div class="form-group">
+												<label class="control-label col-md-3">Photo</label>
+												<div class="col-md-4">
+														<img id="currentPhotoImage" />
+												</div>
+										</div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="fileInput">Photo</label>
+                        <div class="col-md-9">
+                            <input id="fileInput" name="fileInput" type="file" class="file input-group-lg" multiple="true" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3"></label>
+                        <div class="col-md-9">
+                            <div class="pull-right">
+																<a class="btn btn-default" asp-action="Index" asp-controler="Employees">Cancel</a>
+                                <input type="button" class="btn btn-primary" value="Save" id="saveButton" />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div><!-- end of div element which has the class="panel-body" -->
+        </div><!-- end of the div element which has the class="panel" -->
+    </div><!-- end of the div element which has class="col-md-offset-2 col-md-8" -->
+</div><!-- end of div element which has the class="container" -->
+
+@section scripts{
+<link href="~/lib/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet" />
+<script src="~/lib/bootstrap-fileinput/js/fileinput.js"></script>
+<script>
+    function getIdFromAddressBar() {
+        var urlArray = window.location.href.split('/');
+        var id = urlArray[urlArray.length - 1];
+        return id;
+    };
+    window.employeeId = getIdFromAddressBar();
+    window.$fileInputElement = $('#fileInput');
+
+
+    //Note: jQuery.ajax(..) is also often written is $.ajax(..)
+    $loadEmployeeHandler = jQuery.ajax({
+    		type: 'GET',
+    		url: '/API/Employees/' + window.employeeId,
+    })
+    $loadEmployeeHandler.done(function (data, textStatus, jqXHR) {
+    		//The (data) input parameter automatically captures the response 
+    		//from the Get(id) API method
+    		//I usually use the following code
+    		//to inspect the returned result captured by the data input parameter
+    		//from the web server.
+    		var employee = data;
+    		//Copy out the employee imageUrl information
+    		var imageUrl = employee.imageUrl;
+
+    		$('#currentPhotoImage').attr('src', imageUrl);
+    }//end of JavaScript anonymous function
+
+    )//end of the done() method;
+
+    //------------------------------------ Client-side Load Data logic ---(End)---------------------------
+
+
+
+		var footerTemplate = '<div class="file-thumbnail-footer">\n' +
+        '    <div class="file-caption-name" style="width:{width}">{caption}</div>\n' +
+        '    {actions}\n' +
+        '</div>';
+   	   var actionTemplate = '<div class="file-actions">\n' +
+        '       <div class="file-footer-buttons">\n {delete} </div>\n' +
+        '    <div class="file-upload-indicator" tabindex="-1" title="{indicatorTitle}">{indicator}</div>\n' +
+        '    <div class="clearfix"></div>\n' +
+        '</div>';
+   	   window.$fileInputElement.fileinput({
+		    previewFileType: 'image',
+            allowedFileTypes: ['image'],
+            uploadUrl: '/API/Employees/SaveEmployeePhoto',
+            uploadAsync: false,
+            maxFileCount: 1,
+            layoutTemplates: { footer: footerTemplate, actions: actionTemplate },
+            type: 'post',
+            msgInvalidFileType: 'Invalid type for file "{name}". Only "{types}" files are supported.',
+            autoReplace: true,/*http://plugins.krajee.com/file-auto-replace-demo*/
+            overwriteInitial: false,
+            showUploadedThumbs: false,
+            showUpload: false,
+            showRemove: false,
+            browseClass: 'btn btn-primary btn-md pull-right',
+            previewFileIcon: '<i class="glyphicon glyphicon-king"></i>',
+            allowedFileExtensions : ['jpg', 'jpeg','png'],
+        uploadExtraData: function () {  // callback example
+            var out = {employeeId:window.employeeId};
+            return out;
+        }
+    });
+	window.$fileInputElement.on('filebatchuploaderror',
+		             function (event, data, previewId, index) {
+        var form = data.form, files = data.files, extra = data.extra,
+            response = data.response, reader = data.reader;
+        noty({
+        		text: data.jqXHR.responseJSON.message,
+            type: 'error',
+            layout: 'center',
+            template: '<div class="noty_message"><span class="noty_text"></span>'
+        });
+  });
+	window.$fileInputElement.on('filebatchuploadsuccess',
+ function (event, data, previewId, index) {
+ 		var form = data.form, files = data.files, extra = data.extra,
+				response = data.response, reader = data.reader;
+ 		noty({
+ 				text: data.jqXHR.responseJSON.message,
+ 				type: 'success',
+ 				layout: 'center',
+ 				template: '<div class="noty_message"><span class="noty_text"></span>'
+ 		});
+ 		var newImageUrl = data.jqXHR.responseJSON.newImageUrl;
+ 		$('#currentPhotoImage').attr('src', newImageUrl);
+ });
+	$('#saveButton').on('click', function () {
+			var numOfFiles = checkNumOfFiles();
+			//Start of if control block logic to decide whether to begin the upload
+			if (numOfFiles > 0) {
+					window.$fileInputElement.fileinput('upload');
+			} else {
+					noty({
+							text: 'Unable to save because you need to provide an image file first.',
+							type: 'alert',
+							layout: 'center',
+							template: '<div class="noty_message"><span class="noty_text"></span>'
+					});
+			}//end of if control block logic to decide whether to begin the upload
+	});
+		//Helpful function (method) for checking number of files inserted
+		//into the file input interface.
+	function checkNumOfFiles() {
+			var numOfFiles;
+				window.$fileInputElement.each(function () {
+						var $input = $(this),
+										attrib = $input.attr('name').replace(/[\[\]']+/g, ''),
+										i = 0;
+						$.each($input.data('fileinput').filestack, function () {
+								//		console.log(attrib + '[' + i++ + ']', this); //Tested, can work.
+						});
+						numOfFiles = $input.data('fileinput').filestack.length;
+					  //The command below was used for testing.
+						alert('You have attached ' + numOfFiles + ' file(s)');
+						//I had to use parseInt here to make sure the return value is number
+						
+				});
+				return parseInt(numOfFiles);
+		}//End of checkNumOfFiles
+</script>
+}

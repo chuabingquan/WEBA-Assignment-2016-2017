@@ -1,0 +1,245 @@
+﻿<div class="container">
+    <div class="col-md-offset-2 col-md-8">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="panel-title">Create Category Record</div>
+            </div>
+            <div class="panel-body">
+                <form id="dataForm" role="form" data-toggle="validator" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="categoryNameInput">Category Name</label>
+                        <div class="col-md-7">
+                            <input type="text" id="categoryNameInput" class="form-control input-group-sm"
+                                   maxlength="50" placeholder="Category Name" value="" data-error= "Please enter a category name!" required data-validate="true"/>
+                            <div class="help-block with-errors"></div>
+                             <!--<br>-->
+                            <span class="text-muted">Category name allows you to group products by similar attributes. All text are converted to uppercase after save.</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="visibilityInput">Visibility</label>
+                        <div class="col-md-7" id="radioContainer">
+                            <input type="radio" class="visibilityOption" name="visibilityOption" value="0" checked required data-validate="true"/> Visible (ignore start and end date)<br>
+                            <input type="radio" class="visibilityOption" name="visibilityOption" value="1" required data-validate="true"/> Visible (with start and end date)<br>
+                            <input type="radio" class="visibilityOption" name="visibilityOption" value="2" required data-validate="true"/> Hidden
+                        </div>
+                    </div>
+
+
+                    <div class="form-group" id="dateRangeDiv" hidden>
+                        <label class="control-label col-md-3" for="dateRangeInput">Date Range</label>
+                        <div class="col-md-7" id="dateRangeContainer">
+                            <span class="text-muted">Pick a date range for your starting and ending dates.</span>
+                            <input type="text" name="dateRange" value="" placeholder="" data-validate="false"/>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="isSpecialInput">Special Category</label>
+                        <div class="col-md-7">
+                            <input type="checkbox" id="isSpecialInput" value="true" data-validate="false"/>
+                            <span class="text-muted">A special category is directly linked to products (e.g. Festives Sales).</span>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3"></label>
+                        <div class="col-md-9">
+                            <div class="pull-right">
+                                <a class="btn btn-default" asp-action="Index" asp-controler="Categories">Cancel</a>
+                                <button type="button" class="btn btn-primary" value="Save" id="saveButton" disabled>Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div><!-- end of div element which has the class="panel-body" -->
+        </div><!-- end of the div element which has the class="panel" -->
+    </div><!-- end of the div element which has class="col-md-offset-2 col-md-8" -->
+</div><!-- end of div element which has the class="container" -->
+@section scripts{
+    <script>
+        
+        var startDate = '';
+        var endDate = '';
+        //Get current date
+        var currentDate = moment().format('DD/MM/YYYY');
+
+
+    //    $('#dataForm').validator().on('success.form.fv', function(e) {
+    //        e.preventDefault();
+    //        var $form = $(e.target);
+    //        // Enable the submit button
+    //        $form.formValidation('disableSubmitButtons', false);
+        //});
+
+        //WebFormData constructor
+        function WebFormData(inCategoryName, inVisibilityOption, inStartDate, inEndDate, inIsSpecial) {
+            this.categoryName = inCategoryName;
+            this.visibility = inVisibilityOption;
+            this.startDate = inStartDate;
+            this.endDate = inEndDate;
+            this.isSpecial = inIsSpecial;
+        };
+
+        //Hide DateRangePicker based on radio button choice
+        $(document).ready(function () {
+            $("input[name=visibilityOption]").on("change", function () {
+
+                var visibilityOptionChecked = $(this).val();
+                if (visibilityOptionChecked == 0 || visibilityOptionChecked == 2) {
+                    $("#dateRangeDiv").hide();
+                    //startDate = currentDate;
+                    //endDate = currentDate;
+                }
+                else {
+                    $("#dateRangeDiv").show();
+                }
+            });
+        });
+
+        //alert(currentDate);
+
+        startDate = currentDate;
+        endDate = currentDate;
+       
+        //Set dateRangePicker settings
+        $('input[name="dateRange"]').daterangepicker(
+        {
+            locale: {
+                format: 'DD/MM/YYYY'
+            },
+            autoApply: true,
+            minDate: currentDate,
+            startDate: startDate,
+            endDate: endDate
+        },
+        function (start, end) {
+            startDate = start.format('DD/MM/YYYY');
+            endDate = end.format('DD/MM/YYYY');
+        });
+
+        //save button clicked
+        $('#saveButton').on('click', function () {
+                var collectedCategoryName = $('#categoryNameInput').val().toUpperCase();
+                //alert(collectedCategoryName);
+                var collectedVisibilityOption = $('input[name=visibilityOption]:checked').val();
+                //alert(collectedVisibilityOption);
+                var collectedStartDate = startDate;
+                //alert(collectedStartDate);
+                var collectedEndDate = endDate;
+                //alert(collectedEndDate);
+
+                if (!(collectedVisibilityOption == '1')) {
+                    //alert('User did not pick date, dates will be removed from json');
+                    collectedStartDate = '';
+                    collectedEndDate = '';
+                }
+
+                else if (collectedVisibilityOption == '1' && startDate == '' && endDate == '') {
+                    //alert('User selected daterange option but did not apply. Updating means value shown, aka today default');
+                    collectedStartDate = currentDate;
+                    collectedEndDate = currentDate;
+                }
+
+                var collectedIsSpecial = $('#isSpecialInput:checked').val();
+
+                if (collectedIsSpecial == "" || collectedIsSpecial == null) {
+                    collectedIsSpecial = 'false';
+                }
+
+                //alert(collectedIsSpecial);
+
+                var newCategoryData = new WebFormData(collectedCategoryName, collectedVisibilityOption, collectedStartDate, collectedEndDate, collectedIsSpecial);
+                //alert(newCategoryData.categoryName);
+                //alert(newCategoryData.visibility);
+                //alert(newCategoryData.startDate);
+                //alert(newCategoryData.endDate);
+                //alert(newCategoryData.isSpecial);
+
+                var newCategoryDataString = JSON.stringify(newCategoryData);
+
+                console.log('New JSON to be sent to Categories POST Web API' + newCategoryDataString);
+
+                var $addCategoryHandler = $.ajax({
+                    type: 'POST',
+                    url: '/API/Categories',
+                    dataType: 'json',
+                    contentType: 'application/json;',
+                    data: "'" + newCategoryDataString + "'"
+                });
+
+                $addCategoryHandler.done(function (data, textStatus, jqXHR) {
+                    noty({
+                        text: data.message,
+                        type: 'success',
+                        layout: 'center',
+                        template: '<div class = "noty_message" style = "height:50px;"><span class = "noty_text"></span>',
+                        buttons: [
+                        {
+                            addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+                                $noty.close();
+                                $('body').fadeOut(2000, redirectPage);
+                            }
+                        }
+                    ]
+                    });//end of Noty
+                });//End of $addCategoryHandler.done()
+
+                $addCategoryHandler.fail(function (data, textStatus, jqXHR) {
+                    noty({
+                        text: data.responseJSON.message,
+                        type: 'error',
+                        layout: 'center',
+                        template: '<div class="noty_message"><span class="noty_text"></span>'
+                    });//End of noty
+                });//End of $addCategoryHandler.fail()
+        });//End of $('#saveButton').on('click', anonymous function)
+
+
+        //Disable/Enable Save button based on validation
+        var $dataForm = $('#dataForm');
+        var $categoryInput = $('#categoryNameInput');
+        var $saveButtonForMod = $('#saveButton');
+        var attr = $saveButtonForMod.attr('disabled');
+
+
+        $dataForm.on('valid.bs.validator', function (e) {
+            console.log(e.relatedTarget);
+
+            if (e.relatedTarget.id === 'categoryNameInput') {
+
+                if (typeof attr !== typeof undefined && attr !== false) {
+
+                    if ($categoryInput.val() != '' || $categoryInput.val() != null) {
+                        console.log('in second if of valid!');
+                        $saveButtonForMod.removeAttr('disabled');
+                        console.log('Button enabled');
+                    }
+                }
+            }
+        });
+
+        $dataForm.on('invalid.bs.validator', function (e) {
+            console.log(e.relatedTarget);
+
+            if (e.relatedTarget.id === 'categoryNameInput') {
+                if (typeof attr !== typeof undefined && attr !== false) {
+                    console.log('TAKE NOTE');
+                    if ($categoryInput.val() != '' || $categoryInput.val() != null) {
+                        console.log('in second if of invalid!');
+                        $saveButtonForMod.attr('disabled', 'true');
+                        console.log('Button disabled');
+                    }
+                }
+            }
+        });
+
+        function redirectPage() {
+            location.replace('/Categories/Index');
+        };
+
+        
+    </script>
+
+    }
