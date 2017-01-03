@@ -1,5 +1,25 @@
-﻿<h1>Index Page</h1>
+﻿<h1>Administration Panel</h1>
+<br>
 <div class="panel panel-default">
-    <div class="panel-heading">Suggestion to learners</div>
-    <div class="panel-body">The content in this page should contain the features such as statistical dashboard information showing total number of products purchased so far. The content is usually discussed with the final year project clients on what they prefer to see. You all need to advice them that this page show information which can help them translate into actions.</div>
+    <div class="panel-heading">Category Management</div>
+    <div class="panel-body">
+        <a asp-controller="Categories" asp-action="Index" class="btn btn-default col-md-12">Category List</a>
+        <br>
+        <br>
+        <a asp-controller="Categories" asp-action="Create" class="btn btn-default col-md-12">Add Category</a>
+    </div>
 </div>
+<br>
+<div class="panel panel-default">
+    <div class="panel-heading">Brand Management</div>
+    <div class="panel-body">
+        <a asp-controller="Brands" asp-action="Index" class="btn btn-default col-md-12">Brand List</a>
+        <br>
+        <br>
+        <a asp-controller="Brands" asp-action="Create" class="btn btn-default col-md-12">Add Brand</a>
+    </div>
+</div>
+
+
+
+

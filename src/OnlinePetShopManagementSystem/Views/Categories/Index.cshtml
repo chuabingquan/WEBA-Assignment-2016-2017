@@ -191,8 +191,17 @@
                 //and at the same time pass a QueryString data value of the respective employee id.
 
                 //---------------- Using jQuery() to create the hyperlink element using the <a></a> --------
-                $hyperLinkElement = $('<a>Manage Brand</a>').attr('href', '/Brands/Index/' + categoryId);
-                $hyperLinkElement.addClass('btn btn-primary');
+
+                if (isSpecial.toString() == 'true') {
+                    $hyperLinkElement = $('<a>Manage Product</a>').attr('href', '/Products/Index/' + categoryId);
+                    $hyperLinkElement.addClass('btn btn-primary');
+                }
+
+                else {
+                    $hyperLinkElement = $('<a>Manage Brand</a>').attr('href', '/Brands/Index/' + categoryId);
+                    $hyperLinkElement.addClass('btn btn-primary');
+                }
+
                 //The $hyperLinkElement eventually represents (references) a HTML element which is:
                 //<a href="/Employees/ManagePhoto/<student id>" class="btn btn-primary" >Manage Photo</a>
                 //-----------------Using jQuery() to creating the cell for the row----------------------
@@ -220,7 +229,7 @@
 
             $tableBodyElement.empty();
 
-        })//end of $loadEmployeeDataHandler.fail()
+        })//end of $loadCategoryDataHandler.fail()
         
     });
 
@@ -362,8 +371,16 @@
                     //and at the same time pass a QueryString data value of the respective employee id.
 
                     //---------------- Using jQuery() to create the hyperlink element using the <a></a> --------
-                    $hyperLinkElement = $('<a>Manage Brand</a>').attr('href', '/Brands/Index/' + categoryId);
-                    $hyperLinkElement.addClass('btn btn-primary');
+                    if (isSpecial.toString() == 'true') {
+                        $hyperLinkElement = $('<a>Manage Product</a>').attr('href', '/Products/Index/' + categoryId);
+                        $hyperLinkElement.addClass('btn btn-primary');
+                    }
+
+                    else {
+                        $hyperLinkElement = $('<a>Manage Brand</a>').attr('href', '/Brands/Index/' + categoryId);
+                        $hyperLinkElement.addClass('btn btn-primary');
+                    }
+
                     //The $hyperLinkElement eventually represents (references) a HTML element which is:
                     //<a href="/Employees/ManagePhoto/<student id>" class="btn btn-primary" >Manage Photo</a>
                     //-----------------Using jQuery() to creating the cell for the row----------------------

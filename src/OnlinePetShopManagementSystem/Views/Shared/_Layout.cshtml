@@ -14,7 +14,10 @@
         <link rel="stylesheet" href="~/css/sticky_footer.css" />
         <link rel="stylesheet" href="~/lib/bootstrap-multiselect/dist/css/bootstrap-multiselect.css" type="text/css" />
         <link rel="stylesheet" href="~/lib/bootstrap-daterangepicker/daterangepicker.css"/>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.5.3/css/bootstrapValidator.min.css">        
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.5.3/css/bootstrapValidator.min.css"> 
+
+
+           
 
 		@*<script src="~/lib/jquery/dist/jquery.js"></script>*@
         <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.4.min.js"></script>
@@ -50,29 +53,40 @@
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<a class="navbar-brand" href="#">Online Pet Shop Management System</a>
+					<a asp-controller="Home" class="navbar-brand" asp-action="Index">Online Pet Shop Management System</a>
 				</div>
 				<div class="collapse navbar-collapse">
 					<ul class="nav navbar-nav">
-						@if (User.IsInRole("ADMIN") || User.IsInRole("MASTER"))
-						{
-						<li><a asp-controller="UserManager" asp-action="Index">Manage User</a></li>
-						}
+
 							<li class="dropdown ">
 							<a href="#" id="drop2" data-toggle="dropdown" class="dropdown-toggle" role="button">
-																		Employees <b class="caret"></b></a>
+																		Category <b class="caret"></b></a>
 							<ul class="dropdown-menu" role="menu" aria-labelledby="drop2">
-								<li><a asp-controller="Employees" asp-action="Index">Manage Employee</a></li>
+								<li><a asp-controller="Categories" asp-action="Index">Manage Category</a></li>
+                                <li><a asp-controller="Categories" asp-action="Create">Create Category</a></li>
 							</ul>
 						</li>
+
+                        <li class="dropdown ">
+                            <a href="#" id="drop2" data-toggle="dropdown" class="dropdown-toggle" role="button">
+                                Brands <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu" role="menu" aria-labelledby="drop2">
+                                <li><a asp-controller="Brands" asp-action="Index">Manage Brand</a></li>
+                                <li><a asp-controller="Brands" asp-action="Create">Create Brand</a></li>
+                            </ul>
+                        </li>
+
+                        @if (User.IsInRole("ADMIN") || User.IsInRole("MASTER"))
+                        {
+                            <li><a asp-controller="UserManager" asp-action="Index">Manage User</a></li>
+                        }
 						
 					</ul>
 					@await Html.PartialAsync("_LoginPartial")
 				</div><!--/.nav-collapse -->
 			</div>
 		</div>
-        <br>
-        <br>
         <br>
         <br>
     }
@@ -87,7 +101,7 @@
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<a asp-controller="Home" asp-action="Index" class="navbar-brand">Sample</a>
+					<a asp-controller="Home" asp-action="Index" class="navbar-brand">Online Pet Shop Management System</a>
 				</div>
 				<div class="navbar-collapse collapse">
 					<ul class="nav navbar-nav"></ul>
@@ -105,7 +119,7 @@
 	</div><!-- end of div with id="wrap"-->
     <footer class="footer">
         <div class="container">
-            <p class="text-muted">Place sticky footer content here.</p>
+            <p class="text-muted">Chua Bing Quan (2016/2017) </p>
         </div>
  </footer>
 

@@ -192,7 +192,7 @@ namespace OnlinePetShopManagementSystem.APIs
                 //Get name of category filter query
                 if (filterSearchQuery == 0)
                 {
-                    categoryFilterName = "All Categories";
+                    categoryFilterName = "All Brands";
 
                     //If 0 is inputted, you remove all filter limitations 
                     categoryBrandQueryResult = Database.CategoryBrands
@@ -203,7 +203,7 @@ namespace OnlinePetShopManagementSystem.APIs
                 {
                     categoryFilterName = categoriesQueryResult
                         .Where(input => input.CategoryId == filterSearchQuery).Single().CategoryName;
-                }//End of if-else
+                }//End of if - else if- else
 
                 //var lastSearchBrandResult = searchBrandsQueryResult.LastOrDefault();
 
@@ -233,10 +233,12 @@ namespace OnlinePetShopManagementSystem.APIs
 
                             }//End of if
 
-                            else if (filterSearchQuery == 0 && !(categoryBrandResult.BrandId.Equals(searchBrandResult.BrandId)))
-                            {
-                                associatedCategoryList.Add("");
-                            }
+
+                            //If get all brands via 0, brand without cat will be excluded. So invoke this to solve the problem
+                            //else if (filterSearchQuery == 0 && !(categoryBrandResult.BrandId.Equals(searchBrandResult.BrandId)))
+                            //{
+                            //    associatedCategoryList.Add("");
+                            //}
 
                             //If this is the last categoryBrand result based on search filter query...
                             if (categoryBrandResult.CategoryBrandId == categoryBrandQueryResult.Last().CategoryBrandId)
@@ -268,7 +270,9 @@ namespace OnlinePetShopManagementSystem.APIs
                             {
                                 categoriesAssociated += associatedCategoryName.ToString();
 
-                                //If looped category name is not last in associatedCategoryList, add a comma to the string
+                                //categoriesAssociated += ", ";
+
+                                ////If looped category name is not last in associatedCategoryList, add a comma to the string
                                 if (!(associatedCategoryName == associatedCategoryList.Last()))
                                 {
                                     categoriesAssociated += ", ";

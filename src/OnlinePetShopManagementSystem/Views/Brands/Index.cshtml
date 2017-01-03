@@ -8,13 +8,25 @@
                 </div>
                 <div class="navbar-form pull-right">
                     @*<a href="#" class="btn btn-default  btn-group-lg ">Search</a>*@
+
+
                     <div class="col-lg-pull-10">
+
+
+                        <select id="categoryFilterDropdown">
+                        </select>
+
+
                         <div class="input-group">
                             <input type="text" id="searchBox" class="form-control" placeholder="Enter brand name">
                             <span class="input-group-btn">
                                 <button id="searchButton" class="btn btn-default" type="button">Search</button>
                             </span>
                         </div><!-- /input-group -->
+
+
+
+
                     </div><!-- /.col-sm-3 -->
                 </div>
             </div>
@@ -51,24 +63,136 @@
 
     <script>
 
+        console.log('Load dropdown');
+        setupCategoryFilterDropdown();
+        console.log('Load dropdown done');
 
-    loadBrandData();
+        console.log('Load brand data');
+        loadBrandData();
+        console.log('Load brand data done');
+
+        //Declarations
+        //var $categoryFilterDropdown = null;
+
+        //Invoke to retrieve brandId from url
+        console.log('Get Id');
+        window.categoryIdFromCat = getIdFromAddressBar();
+        console.log(window.categoryIdFromCat);
+
+
+        //Get id from address
+        function getIdFromAddressBar() {
+            var urlArray = window.location.href.split('/');
+            var id = urlArray[urlArray.length - 1];
+            return id;
+        };
+
+
+    //Setup Categories Filter Dropdown, make silent communication to retrieve category list and populate dropdown
+    function setupCategoryFilterDropdown() {
+        var $loadCategoriesDataHandler = $.ajax({
+            url: '/API/Categories/GetCategoriesForControls',
+            method: 'GET',
+            dataType: 'json',
+            cache: false
+        });
+
+        $loadCategoriesDataHandler.done(function (data, textStatus, jqXHR) {
+            categoryList = data;
+            var categoryName = '';
+            var categoryId = '';
+            var categorySpecial = '';
+            var $optionElement = null;
+
+            var $categoryFilterDropdown = $('#categoryFilterDropdown');
+
+            $defaultAll = $('<option></option>', { text: 'ALL BRANDS' });
+            var defaultInt = 0;
+            $defaultAll.attr('value', defaultInt);
+            $defaultAll.addClass('categoryOption');
+            $categoryFilterDropdown.append($defaultAll);
+
+
+            for (i = 0; i < categoryList.length; i++) {
+
+                var category = categoryList[i];
+                categoryId = category.categoryId;
+                categoryName = category.categoryName;
+
+                    $optionElement = $('<option></option>', { text: categoryName });
+                    $optionElement.attr('value', categoryId);
+                    $optionElement.addClass('categoryOption');
+                    $categoryFilterDropdown.append($optionElement);
+                
+            }
+
+            //Auto select if url has a categoryId
+            if (window.categoryIdFromCat > 0) {
+                console.log('Selecting: ' + window.categoryIdFromCat);
+                var intCollected = window.categoryIdFromCat;
+                console.log('After assign and var: ' + intCollected);
+                $categoryFilterDropdown.multiselect('select', intCollected);
+                console.log('Selected: ' + window.categoryIdFromCat);
+                searchAndReload();
+            }
+
+
+            
+
+            $categoryFilterDropdown.multiselect({
+                disableIfEmpty: true
+            });
+        });
+    };
+
+
+        
 
 
     //On keystroke in searchbar, show results
 
     $("#searchBox").keyup(function () {
-        //alert("Keyup triggered!");
-        var searchQuery = $.trim(this.value);
-        var searchWebFormData = new webFormData(searchQuery);
+        searchAndReload();
+    });
+
+    //On dropdown list filter change, show results
+    $('#categoryFilterDropdown').on('change', function () {
+        searchAndReload();
+    });
+
+
+    //Search Query Constructor
+    function webFormData(searchQuery, filterQuery) {
+        this.searchQuery = searchQuery;
+        this.filter = filterQuery;
+    }
+
+
+
+    //Function to call whenever there is a new search
+    function searchAndReload() {
+
+        var searchQuery = $("#searchBox").val();
+        var filterQuery = $('#categoryFilterDropdown').find(":selected").val();
+
+
+
+
+        //alert('Keyup detected!');
+        //alert(searchQuery);
+        //alert(filterQuery);
+
+
+
+        var searchWebFormData = new webFormData(searchQuery, filterQuery);
         var searchWebFormDataString = JSON.stringify(searchWebFormData);
 
         var $searchBrandDataHandler = $.ajax({
-            url: '/API/Categories/SearchBrand',
+            url: '/API/Brands/SearchBrand',
             method: 'POST',
             dataType: 'json',
             contentType: 'application/json',
-            data: "'"+searchWebFormDataString+"'"
+            data: "'" + searchWebFormDataString + "'"
         });
 
         $searchBrandDataHandler.done(function (data, textStatus, jqXHR) {
@@ -181,18 +305,9 @@
 
         })//end of $loadEmployeeDataHandler.fail()
 
-    });
-
-    //Search Query Constructor
-    function webFormData(searchQuery) {
-        this.searchQuery = searchQuery;
-    }
 
 
-
-
-
-
+    }//end of searchAndReload
 
 
 
