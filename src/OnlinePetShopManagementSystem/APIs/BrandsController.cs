@@ -772,7 +772,7 @@ namespace OnlinePetShopManagementSystem.APIs
 
             catch (Exception ex)
             {
-                customMessage = "Unexpected error, unable to delete brand record.";
+                customMessage = "Unexpected error, unable to delete brand record. ";
                 object httpFailRequestResultMessage = new { message = customMessage + ex.Message };
                 return BadRequest(httpFailRequestResultMessage);
             }

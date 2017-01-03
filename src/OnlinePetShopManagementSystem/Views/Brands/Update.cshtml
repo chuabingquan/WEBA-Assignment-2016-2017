@@ -5,12 +5,13 @@
                 <div class="panel-title">Update Brand Record</div>
             </div>
             <div class="panel-body">
-                <form id="dataForm" role="form" class="form-horizontal">
+                <form id="dataForm" role="form" data-toggle="validator" class="form-horizontal">
                     <div class="form-group">
                         <label class="control-label col-md-3" for="brandNameInput">Brand Name</label>
                         <div class="col-md-4">
                             <input type="text" id="brandNameInput" class="form-control input-group-sm"
-                                   maxlength="50" placeholder="Brand name" value="" />
+                                   maxlength="50" placeholder="Brand name" value=""  data-error= "Please enter a brand name!" required data-validate="true"/>
+                            <div class="help-block with-errors"></div>
                         </div>
                     </div>
   
@@ -504,13 +505,15 @@
 
 
 
-		//----------------------------------------- Client-side Delete logic -------------------------------------------------
-		$('#deleteButton').on('click', function () {
-				$deleteEmployeeHandler = jQuery.ajax({
+        //----------------------------------------- Client-side Delete logic -------------------------------------------------
+        $('#deleteButton').on('click', function () {
+            var brandIdForDeletion = parseInt(window.brandId);
+            console.log('BrandId is: ' + brandIdForDeletion);
+				$deleteBrandHandler = jQuery.ajax({
 						type: 'DELETE',
-						url: '/API/Employees/' + window.employeeId
+						url: '/API/Brands/' + brandIdForDeletion
 				})//end of jQuery.ajax() call
-				$deleteEmployeeHandler.done(function (data, textStatus, jqXHR) {
+				$deleteBrandHandler.done(function (data, textStatus, jqXHR) {
 						noty({
 								text: data.message, type: 'success',
 								layout: 'center',
@@ -526,7 +529,7 @@
 						});//end of noty()
 				});//end of $deleteEmployeeHandler.done()
 
-				$deleteEmployeeHandler.fail(function (data, textStatus, jqXHR) {
+				$deleteBrandHandler.fail(function (data, textStatus, jqXHR) {
 						console.log(data);
 						noty({
 								text: data.responseJSON.message, type: 'error',
@@ -537,10 +540,46 @@
 
 		});// end of $('#deleteButton').on('click', function () { ...}
 
-		function redirectPage() {
-				location.replace('/Employees/Index');
-		}// end of redirectPage() method (function)
+
 	 //----------------------------------------- Client-side Delete logic -(End)-------------------------------------------
+
+
+
+        //Disable/Enable Save button based on validation
+        var $dataForm = $('#dataForm');
+        var $brandInput = $('#brandNameInput');
+        var $updateButtonForMod = $('#updateButton');
+        var attr = $updateButtonForMod.attr('disabled');
+
+
+        $dataForm.on('valid.bs.validator', function (e) {
+            console.log(e.relatedTarget);
+
+            if (e.relatedTarget.id === 'brandNameInput') {
+
+                //if (typeof attr !== typeof undefined && attr !== false) {
+
+                if ($brandInput.val() != '' || $brandInput.val() != null) {
+                    console.log('in second if of valid!');
+                    $updateButtonForMod.removeAttr('disabled');
+                    console.log('Button enabled');
+                }
+            }
+            //}
+        });
+
+        $dataForm.on('invalid.bs.validator', function (e) {
+            console.log(e.relatedTarget);
+
+            if (e.relatedTarget.id === 'brandNameInput') {
+                console.log('TAKE NOTE');
+                if ($brandInput.val() != '' || $brandInput.val() != null) {
+                    console.log('in second if of invalid!');
+                    $updateButtonForMod.attr('disabled', 'true');
+                    console.log('Button disabled');
+                }
+            }
+        });
 
 
         //Redirect function

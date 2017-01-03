@@ -313,6 +313,10 @@ namespace OnlinePetShopManagementSystem.APIs
             var foundOneCategory = Database.Categories
                 .Where(item => item.CategoryId == id).FirstOrDefault();
 
+            var associatedCB = Database.CategoryBrands
+                .Where(input => input.CategoryId == foundOneCategory.CategoryId);
+
+
             String orginalCatName = foundOneCategory.CategoryName;
 
             foundOneCategory.CategoryName = changedCategoryInput.categoryName.Value;
@@ -343,6 +347,15 @@ namespace OnlinePetShopManagementSystem.APIs
             }
 
             foundOneCategory.IsSpecial = bool.Parse(changedCategoryInput.isSpecial.Value);
+
+
+            if (associatedCB.Any() == true && foundOneCategory.IsSpecial == true)
+            {
+                customMessage = "Update failed as category \""+ changedCategoryInput.categoryName.Value + "\" is associated with brands and cannot be special.";
+                object httpFailRequestResultMessage = new { Message = customMessage };
+                return BadRequest(httpFailRequestResultMessage);
+            }
+
 
             foundOneCategory.UpdatedAt = DateTime.Now;
 
@@ -425,8 +438,8 @@ namespace OnlinePetShopManagementSystem.APIs
                     associatedBrandsString += ".";
 
                     //Error deleting message
-                    customMessage = "Your category, " + foundOneCategory.CategoryName + " cannot be deleted as it is associated with brands: "
-                        + associatedBrandsString + "Please delete these brands first before deleting " + foundOneCategory.CategoryName + " category.";
+                    customMessage = "Your category, \"" + foundOneCategory.CategoryName + "\" cannot be deleted as it is associated with brands: "
+                        + associatedBrandsString + " Please delete these brands first before deleting \"" + foundOneCategory.CategoryName + "\" category.";
 
                     object httpFailRequestResultMessage = new
                     {

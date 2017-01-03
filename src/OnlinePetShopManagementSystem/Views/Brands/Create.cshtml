@@ -5,14 +5,15 @@
                 <div class="panel-title">Create Brand Record</div>
             </div>
             <div class="panel-body">
-                <form id="dataForm" role="form" class="form-horizontal">
+                <form id="dataForm" role="form" data-toggle="validator" class="form-horizontal">
 
 
                     <div class="form-group">
                         <label class="control-label col-md-3" for="brandNameInput">Brand Name</label>
                         <div class="col-md-4">
                             <input type="text" id="brandNameInput" class="form-control input-group-sm"
-                                   maxlength="50" placeholder="Brand name" value="" />
+                                   maxlength="50" placeholder="Brand name" value="" data-error= "Please enter a brand name!" required data-validate="true"/>
+                            <div class="help-block with-errors"></div>
                         </div>
                     </div>
 
@@ -28,7 +29,8 @@
                     <div class="form-group">
                         <label class="control-label col-md-3" for="brandPhotoUploadInput">Photo</label>
                         <div class="col-md-9">
-                            <input id="fileInput" name="fileInput" type="file" class="file input-group-lg" multiple />
+                            <input id="fileInput" name="fileInput" type="file" class="file input-group-lg" multiple data-error="Please upload a brand image!" required data-validate="true"/>
+                            <div class="help-block with-errors"></div>
                         </div>
                     </div>
 
@@ -38,7 +40,7 @@
                         <div class="col-md-9">
                             <div class="pull-right">
                                 <a class="btn btn-default" asp-action="Index" asp-controler="Brands">Cancel</a>
-                                <input type="button" class="btn btn-primary" value="Save" id="saveButton" />
+                                <input type="button" class="btn btn-primary" value="Save" id="saveButton" disabled/>
                             </div>
                         </div>
                     </div>
@@ -118,6 +120,8 @@
 		    uploadUrl: '/API/Brands/SaveBrandDataAndPhoto',
         uploadAsync: false,
         maxFileCount: 1,
+        minFileCount: 1,
+        validateInitialCount: true,
         layoutTemplates: { footer: footerTemplate, actions: actionTemplate },
         type: 'post',
         msgInvalidFileType: 'Invalid type for file "{name}". Only "{types}" files are supported.',
@@ -156,6 +160,12 @@
     });
 });
 
+        //Validate file input 
+		var fileName = $brandPhotoInputElement.val();
+		var numberOfFiles = 0;
+		if (fileName != '') {
+		    numberOfFiles = 1;
+		}
 
 
         //Save brand data logic
@@ -199,6 +209,72 @@
 				this.BrandName = inBrandName;
 				this.selectedAssociatedCat = inCategories;
 		}
+
+
+
+		//Disable/Enable Save button based on validation
+		var $dataForm = $('#dataForm');
+		var $brandInput = $('#brandNameInput');
+		var $saveButtonForMod = $('#saveButton');
+		var attr = $saveButtonForMod.attr('disabled');
+
+
+		$dataForm.on('valid.bs.validator', function (e) {
+		    console.log(e.relatedTarget);
+
+		    if (e.relatedTarget.id === 'brandNameInput') {
+
+		        if (typeof attr !== typeof undefined && attr !== false) {
+
+		            if ($brandInput.val() != '' || $brandInput.val() != null) {
+		                console.log('in second if of valid!');
+		                $saveButtonForMod.removeAttr('disabled');
+		                console.log('Button enabled');
+		            }
+		        }
+		    }
+
+		    else if (e.relatedTarget.id === 'fileInput') {
+
+		        if (typeof attr !== typeof undefined && attr !== false) {
+
+		            if (numberOfFiles > 0) {
+		                console.log('in second if of valid!');
+		                $saveButtonForMod.removeAttr('disabled');
+		                console.log('Button enabled');
+		            }
+		        }
+		    }
+		});
+
+		$dataForm.on('invalid.bs.validator', function (e) {
+		    console.log(e.relatedTarget);
+
+		    if (e.relatedTarget.id === 'brandNameInput') {
+		        if (typeof attr !== typeof undefined && attr !== false) {
+		            console.log('TAKE NOTE');
+		            if ($brandInput.val() != '' || $brandInput.val() != null) {
+		                console.log('in second if of invalid!');
+		                $saveButtonForMod.attr('disabled', 'true');
+		                console.log('Button disabled');
+		            }
+		        }
+		    }
+
+		    else if (e.relatedTarget.id === 'fileInput') {
+                if (typeof attr !== typeof undefined && attr !== false) {
+                    console.log('TAKE NOTE');
+		        if (numberOfFiles < 0) {
+		            console.log('in second if of invalid!');
+		            $saveButtonForMod.attr('disabled', 'true');
+		            console.log('Button disabled');
+		        }
+		    }
+
+		    }
+		});
+
+
 
 		function redirectPage() {
 		    location.replace('/Brands/Index');
