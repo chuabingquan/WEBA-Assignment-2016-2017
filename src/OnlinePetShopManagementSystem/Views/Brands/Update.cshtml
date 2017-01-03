@@ -16,6 +16,21 @@
   
 
                     <div class="form-group">
+                        <label class="control-label col-md-3" for="categoryIdInput">Category</label>
+                        <div class="col-md-7">
+                            <select id="categoryDropdownCB" class="form-control input-group-sm" multiple="multiple"></select>
+                        </div>
+                    </div>
+
+                    
+                    <div class="form-group">
+                        <label class="control-label col-md-3">Current Photo</label>
+                        <div class="col-md-4">
+                            <img id="currentPhotoImage" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label class="control-label col-md-3" for="brandPhotoUploadInput">Photo</label>
                         <div class="col-md-9">
                             <input id="fileInput" name="fileInput" type="file" class="file input-group-lg" multiple />
@@ -23,22 +38,18 @@
                     </div>
 
 
-                    <div class="form-group">
-                        <label class="control-label col-md-3" for="categoryIdInput">Category</label>
-                        <div class="col-md-7">
-                            <select id="categoryDropdownCB" class="form-control input-group-sm" multiple="multiple">
-                            </select>
-                        </div>
-                    </div>
-
 
                     <div class="form-group">
                         <label class="control-label col-md-3"></label>
                         <div class="col-md-9">
+
+                            <div class="pull-left">
+                                <button type="button" class="btn btn-danger" value="Delete" id="deleteButton">Delete</button>
+                            </div>
+
                             <div class="pull-right">
                                 <a class="btn btn-default" asp-action="Index" asp-controler="Brands">Cancel</a>
-                                <input type="button" class="btn btn-danger" value="Delete" id="deleteButton" />
-                                <input type="button" class="btn btn-primary" value="Save" id="saveButton" />
+                                <input type="button" class="btn btn-primary" value="Update" id="updateButton" />
                             </div>
                         </div>
                     </div>
@@ -65,10 +76,8 @@
         //Declarations
         var $categoryDropdownCB = null;
         var categoryList = null;
-        var brandPhotoUrl = 'test';
         window.$photoInputElement = $('#fileinput');
 
- 
 
 
     //Get id from address
@@ -104,6 +113,7 @@
 
                 $optionElement = $('<option></option>', { text: categoryName });
                 $optionElement.attr('value', categoryId);
+                $optionElement.addClass('categoryOption');
                 $categoryDropdownCB.append($optionElement);
             }
 
@@ -125,10 +135,11 @@
             var brand = data;
             var brandId = brand.brandId;
             var brandName = brand.brandName;
-            brandPhotoUrl = brand.brandPhotoUrl;
-            //alert(brandPhotoUrl);
+            var brandPhotoUrl = brand.brandPhotoUrl;
+            console.log(brandPhotoUrl);
             var alreadySelectedCategoryId = '';
             var category = brand.category;
+            var $currentBrandImg = null;
 
             //Logic to preselect existing categories to be reflected on the categories dropdown
             for (i = 0; i < category.length; i++) {
@@ -144,16 +155,90 @@
             }
 
             $('#brandNameInput').val(brandName);
-            $('#currentBrandPhotoImage').attr('src', brandPhotoUrl);
+            $('#currentPhotoImage').attr('src', brandPhotoUrl);
+
+            
         }//end of function to retrieve data and populate webform
             );//end of the done() method;
     
+		//------------------------------------ Client-side Load Data logic ---(End)---------------------------
 
-        //Upload Binary File Image logic
 
-        window.webFormData = null;
+        //------------------------------------ Image upload Data logic ---(Start)---------------------------
+
+        //window.webFormData = null;
+        //window.$brandPhotoInputElement = $('#fileInput');
+
+        //var footerTemplate = '<div class="file-thumbnail-footer">\n' +
+        //'    <div class="file-caption-name" style="width:{width}">{caption}</div>\n' +
+        //'    {actions}\n' +
+        //'</div>';
+        //var actionTemplate = '<div class="file-actions">\n' +
+        // '       <div class="file-footer-buttons">\n {delete} </div>\n' +
+        // '    <div class="file-upload-indicator" tabindex="-1" title="{indicatorTitle}">{indicator}</div>\n' +
+        // '    <div class="clearfix"></div>\n' +
+        // '</div>';
+
+        //$('#fileInput').fileinput({
+        //    previewFileType: 'image',
+        //    allowedFileTypes: ['image'],
+        //    //method: 'PUT',
+        //    uploadUrl: '/API/Brands/UpdateBrandDataAndPhoto',
+        //    uploadAsync: false,
+        //    maxFileCount: 1,
+        //    layoutTemplates: { footer: footerTemplate, actions: actionTemplate },
+        //    type: 'post',
+        //    msgInvalidFileType: 'Invalid type for file "{name}". Only "{types}" files are supported.',
+        //    autoReplace: true,/*http://plugins.krajee.com/file-auto-replace-demo*/
+        //    overwriteInitial: false,
+        //    showUploadedThumbs: false,
+        //    showUpload: false,
+        //    showRemove: false,
+        //    browseClass: 'btn btn-primary btn-md pull-right',
+        //    previewFileIcon: '<i class="glyphicon glyphicon-king"></i>',
+        //    allowedFileExtensions: ['jpg', 'jpeg', 'png'],
+        //    uploadExtraData: function () {
+        //        return window.webFormData;
+        //    }
+        //});
+
+
+        //window.$brandPhotoInputElement.on('filebatchuploadsuccess',
+        //     function (event, data, previewId, index) {
+        //         var form = data.form, files = data.files, extra = data.extra,
+        //             response = data.response, reader = data.reader;
+        //         console.log(data.Message);
+        //         console.log(event);
+        //         console.dir(data);
+        //         noty({
+        //             text: data.jqXHR.responseJSON.message,
+        //             type: 'success',
+        //             layout: 'center',
+        //             template: '<div class = "noty_message" style = "height:50px;"><span class = "noty_text"></span>',
+        //             buttons: [
+        //             {
+        //                 addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+        //                     $noty.close();
+        //                     $('body').fadeOut(2000, redirectPage);
+        //                 }
+        //             }
+        //             ]
+        //         });
+        //     });
+
+        //------------------------------------ Image upload Data logic ---(End)---------------------------
+
+
+
+
+        //------------------------------------ Image upload Data logic REVISED ---(Start)---------------------------
+
+
+
+
+
+
         window.$brandPhotoInputElement = $('#fileInput');
-
         var footerTemplate = '<div class="file-thumbnail-footer">\n' +
         '    <div class="file-caption-name" style="width:{width}">{caption}</div>\n' +
         '    {actions}\n' +
@@ -163,15 +248,12 @@
          '    <div class="file-upload-indicator" tabindex="-1" title="{indicatorTitle}">{indicator}</div>\n' +
          '    <div class="clearfix"></div>\n' +
          '</div>';
-
-        //alert(brandPhotoUrl);
-
-        $('#fileInput').fileinput({
+        window.$brandPhotoInputElement.fileinput({
             previewFileType: 'image',
             allowedFileTypes: ['image'],
-            uploadUrl: '/API/Brands/SaveBrandDataAndPhoto',
+            uploadUrl: '/API/Brands/UploadBrandPhotoAndUpdateBrandData',
             uploadAsync: false,
-            maxFileCount: 1,
+            maxFileCount: 3,
             layoutTemplates: { footer: footerTemplate, actions: actionTemplate },
             type: 'post',
             msgInvalidFileType: 'Invalid type for file "{name}". Only "{types}" files are supported.',
@@ -183,54 +265,244 @@
             browseClass: 'btn btn-primary btn-md pull-right',
             previewFileIcon: '<i class="glyphicon glyphicon-king"></i>',
             allowedFileExtensions: ['jpg', 'jpeg', 'png'],
-            uploadExtraData: function () {
-                return window.webFormData;
+            uploadExtraData: function () {  // callback example
+                var out = {};
+                return out;
             }
         });
-		//------------------------------------ Client-side Load Data logic ---(End)---------------------------
 
 
-    //----------------------------------------- Client-side Update logic --------------------------------
-    $('#saveButton').on('click', function () {
-    		//Collect data from input elements
-    		var collectedFullName = $('#fullNameInput').val();
-    		var collectedJoinDate = $('#joinDateInput').val();
+        window.$brandPhotoInputElement.on('filebatchuploadsuccess',
+                      function (event, data, previewId, index) {
+                          //It is not necessary that an upload has occurred because the user
+                          //may have only made changes to the employee data but did not
+                          //select a new file.
+                          var form = data.form, files = data.files, extra = data.extra,
+                          response = data.response, reader = data.reader;
+                          console.log(data.Message);
+                          console.log(event);
+                          console.dir(data);
+                          noty({
+                              text: data.jqXHR.responseJSON.Message,
+                              type: 'success',
+                              layout: 'center',
+                              template: '<div class="noty_message"><span class="noty_text"></span>'
+                          });
+                          var newImageUrl = data.jqXHR.responseJSON.NewImageUrl;
+                          $('#currentPhotoImage').attr('src', newImageUrl);
+                      });
 
-    		var webFormData = new WebFormData(collectedFullName,
-						collectedJoinDate);
-    		var webFormDataInString = JSON.stringify(webFormData);
-    		$saveEmployeeHandler = jQuery.ajax({
-    				method: 'PUT',
-    				contentType: 'application/json',
-    				url: '/Api/Employees/' + window.employeeId,
-    				data: "'" + webFormDataInString + "'"
-    		});
-    		$saveEmployeeHandler.done(function (data, textStatus, jqXHR) {
-    				noty({
-    						text: data.message,
-    						type: 'success',
-    						layout: 'center',
-    						template: '<div class="noty_message"><span class="noty_text"></span>'
-    				});
-    		});
-    		$saveEmployeeHandler.fail(function (data, textStatus, jqXHR) {
-    				noty({
-    						text: data.message,
-    						type: 'error',
-    						layout: 'center',
-    						template: '<div class="noty_message"><span class="noty_text"></span>'
-    				});
-    		});
-    });
-	//End of $('#saveButton').on('click', function () {
 
-		//Define the object constructor, WebFormData which you can create
-		//a suitable object of information which is needed by the Web API Post() method
-		function WebFormData(inFullName, inJoinDate) {
-				this.fullName = inFullName;
-				this.joinDate = inJoinDate;
-		}
+
+
+
+
+
+
+
+
+
+
+
+        //------------------------------------ Image upload Data logic REVISED ---(End)---------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //----------------------------------------- Client-side Update logic --------------------------------
+
+        $('#updateButton').on('click', function () {
+            //Collect data from input elements
+            var collectedBrandName = $('#brandNameInput').val().toUpperCase();
+            var collectedCategories = [];
+
+
+            //Get all checked categories
+            $(".categoryOption:selected").each(function () {
+                var category = {};
+                category.categoryId = this.value;
+                console.log(category.categoryId);
+                collectedCategories.push(category);
+            });
+
+
+            for (var x = 0; x < collectedCategories; x++) {
+                var cat = collectedCategories[x];
+                console.log('Selected Category ' + cat.categoryId);
+            }
+
+            var fileName = $brandPhotoInputElement.val();
+            var numberOfFiles = 0;
+            if (fileName != '') {
+                numberOfFiles = 1;
+            }
+
+            //var collectedCategoriesString = JSON.stringify(collectedCategories);
+
+            var webFormData = new WebFormData(collectedBrandName,
+						collectedCategories);
+
+
+            var webFormDataInString = JSON.stringify(webFormData);
+
+            console.log(webFormDataInString);
+
+            if (numberOfFiles > 0) {
+                $updateBrandHandler = jQuery.ajax({
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    url: '/API/Brands/SaveBrandUpdateInformationIntoSession/' + window.brandId,
+                    data: "'" + webFormDataInString + "'"
+                });
+                $updateBrandHandler.done(function (data, textStatus, jqXHR) {
+                    if (window.$brandPhotoInputElement.val() != '') {
+                        //Using this command will get the FileUpload widget to begin upload
+                        window.$brandPhotoInputElement.fileinput('upload');
+                    } else {
+                        noty({
+                            text: data.Message,
+                            type: 'success',
+                            layout: 'center',
+                            template: '<div class="noty_message"><span class="noty_text"></span>'
+                        });
+                    }
+                });
+                $updateBrandHandler.fail(function (data, textStatus, jqXHR) {
+                    noty({
+                        text: data.responseJSON.Message,
+                        type: 'error',
+                        layout: 'center',
+                        template: '<div class="noty_message"><span class="noty_text"></span>'
+                    });
+                });
+            }//end of if (numberOfFiles>0) condition block
+
+            if (numberOfFiles == 0) {
+                $updateBrandHandler = jQuery.ajax({
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    url: '/API/Brands/SaveBrandUpdateInformationIntoDatabase/' + window.brandId,
+                    data: "'" + webFormDataInString + "'"
+                });
+                $updateBrandHandler.done(function (data, textStatus, jqXHR) {
+                    noty({
+                        text: data.Message,
+                        type: 'success',
+                        layout: 'center',
+                        template: '<div class="noty_message"><span class="noty_text"></span>'
+                    });
+                });
+                $updateBrandHandler.fail(function (data, textStatus, jqXHR) {
+                    noty({
+                        text: data.responseJSON.Message,
+                        type: 'error',
+                        layout: 'center',
+                        template: '<div class="noty_message"><span class="noty_text"></span>'
+                    });
+                });
+            }//end of if (numberOfFiles==0) condition block
+
+
+        });
+        //Define the object constructor, WebFormData which you can create
+        //a suitable object of information which is needed by the Web API Post() method
+
+        function WebFormData(inBrandName, inCategories) {
+            this.brandName = inBrandName;
+            this.selectedAssociatedCat = inCategories;
+        };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            ////Update brand data logic
+            //$('#updateButton').on('click', function () {
+            //    //Collect data from input elements
+            //    var collectedBrandName = $('#brandNameInput').val().toUpperCase();
+            //    var collectedCategories = [];
+
+
+            //    //Get all checked categories
+            //    $(".categoryOption:selected").each(function () {
+            //        var category = {};
+            //        category.categoryId = this.value;
+            //        collectedCategories.push(category);
+            //    });
+
+            //    //Old get all checked categories
+            //    //$('.categoryOption:checked').each(function () {
+            //    //    var category = {};
+            //    //    category.categoryId = parseInt($(this).val());
+            //    //    collectedCategories.push(category);
+            //    //});
+
+            //    console.log('New brand details to be added: ');
+            //    console.log(collectedBrandName);
+
+            //    for (i = 0; i < collectedCategories.length; i++) {
+            //        var categorySelected = collectedCategories[i];
+            //        console.log("Checkbox selected: " + categorySelected.categoryName + ', ' + categorySelected.categoryId);
+            //    }
+
+            //    collectedCategoriesString = JSON.stringify(collectedCategories);
+            //    window.webFormData = new WebFormData(collectedBrandName, collectedCategoriesString);
+            //    window.$brandPhotoInputElement.fileinput('upload');
+
+            //});
+            ////Define the object constructor, WebFormData which you can create
+            ////a suitable object of information which is needed by the Web API Post() method
+            //function WebFormData(inBrandName, inCategories) {
+            //    this.BrandName = inBrandName;
+            //    this.selectedAssociatedCat = inCategories;
+            //};
 		//----------------------------------------- Client-Side Update logic ---(End)-------------------------------------
+
+
+
+
+
 
 		//----------------------------------------- Client-side Delete logic -------------------------------------------------
 		$('#deleteButton').on('click', function () {
@@ -270,6 +542,11 @@
 		}// end of redirectPage() method (function)
 	 //----------------------------------------- Client-side Delete logic -(End)-------------------------------------------
 
+
+        //Redirect function
+		function redirectPage() {
+		    location.replace('/Brands/Index');
+		};
 
     </script>
 }

@@ -161,7 +161,7 @@
         //Save brand data logic
 		$('#saveButton').on('click', function () {
 		    //Collect data from input elements
-		    var collectedBrandName = $('#brandNameInput').val();
+		    var collectedBrandName = $('#brandNameInput').val().toUpperCase();
 		    var collectedCategories = [];
 
 
@@ -199,6 +199,10 @@
 				this.BrandName = inBrandName;
 				this.selectedAssociatedCat = inCategories;
 		}
+
+		function redirectPage() {
+		    location.replace('/Brands/Index');
+		};
 
     </script>
 } 

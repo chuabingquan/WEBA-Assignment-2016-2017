@@ -127,7 +127,8 @@ namespace OnlinePetShopManagementSystem.APIs
                 categoryList.Add((new
                     {
                         categoryId = category.CategoryId,
-                        categoryName = category.CategoryName
+                        categoryName = category.CategoryName,
+                        categoryIsSpecial = category.IsSpecial
                     }));
             }
 
