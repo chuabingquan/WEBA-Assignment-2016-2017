@@ -132,6 +132,7 @@
                 var intCollected = window.categoryIdFromCat;
                 console.log('After assign and var: ' + intCollected);
                 $categoryFilterDropdown.multiselect('select', intCollected);
+                $categoryFilterDropdown.multiselect('deselect', '0');
                 console.log('Selected: ' + window.categoryIdFromCat);
                 searchAndReload();
             }

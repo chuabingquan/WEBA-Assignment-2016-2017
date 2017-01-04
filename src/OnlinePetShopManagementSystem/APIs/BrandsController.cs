@@ -923,6 +923,7 @@ namespace OnlinePetShopManagementSystem.APIs
                 foundOneBrand.BrandPhoto.PublicId = currentBrandPhoto.PublicId;
                 foundOneBrand.BrandPhoto.Url = currentBrandPhoto.Url;
                 foundOneBrand.BrandPhoto.SecureUrl = currentBrandPhoto.SecureUrl;
+                customMessage = "Brand is updated successfully with new image!";
             }
 
             try
@@ -951,9 +952,9 @@ namespace OnlinePetShopManagementSystem.APIs
 
             var successRequestResultMessage = new
             {
-                Message = "Brand is updated successfully with new image!.",
-                //NewImageUrl = foundOneBrand.BrandPhoto.Url
+                message = customMessage
             };
+
             OkObjectResult httpOkResult = new OkObjectResult(successRequestResultMessage);
             return httpOkResult;
         }//End of UploadBrandPhotoAndUpdateBrandData()

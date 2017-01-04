@@ -59,7 +59,6 @@
         </div><!-- end of the div element which has the class="panel" -->
     </div><!-- end of the div element which has class="col-md-offset-2 col-md-8" -->
 </div><!-- end of div element which has the class="container" -->
-<button class="btn" id="checkNumberOfFilesButton">Test</button>
 @section scripts{
     <link href="~/lib/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet" />
     <script src="~/lib/bootstrap-fileinput/js/fileinput.min.js"></script>
@@ -416,6 +415,7 @@
                     }
                 });
                 $updateBrandHandler.fail(function (data, textStatus, jqXHR) {
+                    console.log(data);
                     noty({
                         text: data.responseJSON.message,
                         type: 'error',
