@@ -854,6 +854,7 @@ namespace OnlinePetShopManagementSystem.APIs
         {
             //Retrieve the brand data which is stashed inside the Session, "Brand".
             //http://benjii.me/2015/07/using-sessions-and-httpcontext-in-aspnet5-and-mvc6/
+            string customMessage = "";
 
             var brandString = HttpContext.Session.GetString("Brand");
             var changedCBString = HttpContext.Session.GetString("AssociatedCB");
@@ -923,12 +924,35 @@ namespace OnlinePetShopManagementSystem.APIs
                 foundOneBrand.BrandPhoto.Url = currentBrandPhoto.Url;
                 foundOneBrand.BrandPhoto.SecureUrl = currentBrandPhoto.SecureUrl;
             }
-            Database.Brands.Update(foundOneBrand);
-            Database.SaveChanges();
+
+            try
+            {
+                Database.Brands.Update(foundOneBrand);
+                Database.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                object httpFailRequestResultMessage;
+                if (ex.InnerException.Message.Contains("Brand_BrandName_UniqueConstraint"))
+                {
+                    customMessage = "Update failed as there is already a Brand by the same name, \""
+                        + brandToBeUpdated.BrandName + "\" in the database records. Please use another Brand Name.";
+                    httpFailRequestResultMessage = new { Message = customMessage };
+                    return BadRequest(httpFailRequestResultMessage);
+                }
+
+                customMessage = "Unable to update brand.";
+                //Create a fail message anonymous object that has one property, Message.
+                //This anonymous object's Message property contains a simple string message
+                httpFailRequestResultMessage = new { Message = customMessage };
+                //Return a bad http request message to the client
+                return BadRequest(httpFailRequestResultMessage);
+            }
+
             var successRequestResultMessage = new
             {
-                Message = "Brand is updated successfully!.",
-                NewImageUrl = foundOneBrand.BrandPhoto.Url
+                Message = "Brand is updated successfully with new image!.",
+                //NewImageUrl = foundOneBrand.BrandPhoto.Url
             };
             OkObjectResult httpOkResult = new OkObjectResult(successRequestResultMessage);
             return httpOkResult;
@@ -980,14 +1004,24 @@ namespace OnlinePetShopManagementSystem.APIs
 
                 Database.Brands.Update(foundOneBrand);
                 Database.SaveChanges();//Without this command, the changes are not committed.
-                customMessage = "Saved employee into database.";
+                customMessage = "Your brand is updated!";
             }
             catch (Exception ex)
             {
+                object httpFailRequestResultMessage;
+                if (ex.InnerException.Message.Contains("Brand_BrandName_UniqueConstraint"))
+                {
+                    customMessage = "Update failed as there is already a Brand by the same name, \""
+                        + changedBrandInput.brandName.Value + "\" in the database records. Please use another Brand Name.";
+                    httpFailRequestResultMessage = new { Message = customMessage };
+                    return BadRequest(httpFailRequestResultMessage);
+                }
+
+
                 customMessage = "Unable to update brand.";
                 //Create a fail message anonymous object that has one property, Message.
                 //This anonymous object's Message property contains a simple string message
-                object httpFailRequestResultMessage = new { Message = customMessage };
+                httpFailRequestResultMessage = new { Message = customMessage };
                 //Return a bad http request message to the client
                 return BadRequest(httpFailRequestResultMessage);
             }//End of Try..Catch block
