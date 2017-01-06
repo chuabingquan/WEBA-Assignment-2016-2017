@@ -8,7 +8,7 @@ using OnlinePetShopManagementSystem.Data;
 namespace OnlinePetShopManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20161225101806_setupdb")]
+    [Migration("20170104154849_setupdb")]
     partial class setupdb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

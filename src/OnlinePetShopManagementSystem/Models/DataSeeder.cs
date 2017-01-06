@@ -405,6 +405,99 @@ namespace OnlinePetShopManagementSystem.Models
             db.CategoryProducts.Add(clearanceNutripe1Product);
 
 
+            BrandPhoto addictionImg, avodermImg, boschImg, dailyDelightImg, justFishImg, nutripeImg;
+
+            addictionImg = new BrandPhoto()
+            {
+                BrandId = addiction.BrandId,
+                CreatedAt = DateTime.Now,
+                Format = "jpg",
+                Height = 179,
+                ImageSize = 27080,
+                PublicId = "Brands/hol86dfxhxehguhrorb2",
+                SecureUrl = "https://res.cloudinary.com/chuabingquan/image/upload/v1483543661/Brands/hol86dfxhxehguhrorb2.jpg",
+                Url = "http://res.cloudinary.com/chuabingquan/image/upload/v1483543661/Brands/hol86dfxhxehguhrorb2.jpg",
+                Version = 1483543661,
+                Width = 202
+            };
+
+            avodermImg = new BrandPhoto()
+            {
+                BrandId = avoderm.BrandId,
+                CreatedAt = DateTime.Now,
+                Format = "jpg",
+                Height = 179,
+                ImageSize = 24788,
+                PublicId = "Brands/duwy4mfepo1a1slfpvfh",
+                SecureUrl = "https://res.cloudinary.com/chuabingquan/image/upload/v1483543737/Brands/duwy4mfepo1a1slfpvfh.jpg",
+                Url = "http://res.cloudinary.com/chuabingquan/image/upload/v1483543737/Brands/duwy4mfepo1a1slfpvfh.jpg",
+                Version = 1483543737,
+                Width = 202
+            };
+
+            boschImg = new BrandPhoto()
+            {
+                BrandId = bosch.BrandId,
+                CreatedAt = DateTime.Now,
+                Format = "jpg",
+                Height = 179,
+                ImageSize = 50562,
+                PublicId = "Brands/tccedcpniw41cwyymvda",
+                SecureUrl = "https://res.cloudinary.com/chuabingquan/image/upload/v1483543789/Brands/tccedcpniw41cwyymvda.jpg",
+                Url = "http://res.cloudinary.com/chuabingquan/image/upload/v1483543789/Brands/tccedcpniw41cwyymvda.jpg",
+                Version = 1483543789,
+                Width = 202
+            };
+
+            dailyDelightImg = new BrandPhoto()
+            {
+                BrandId = dailyDelight.BrandId,
+                CreatedAt = DateTime.Now,
+                Format = "jpg",
+                Height = 179,
+                ImageSize = 34676,
+                PublicId = "Brands/j6hbhiyoxd1uwjrxbe3x",
+                SecureUrl = "https://res.cloudinary.com/chuabingquan/image/upload/v1483543817/Brands/j6hbhiyoxd1uwjrxbe3x.jpg",
+                Url = "http://res.cloudinary.com/chuabingquan/image/upload/v1483543817/Brands/j6hbhiyoxd1uwjrxbe3x.jpg",
+                Version = 1483543817,
+                Width = 202
+            };
+
+            justFishImg = new BrandPhoto()
+            {
+                BrandId = justFish.BrandId,
+                CreatedAt = DateTime.Now,
+                Format = "jpg",
+                Height = 179,
+                ImageSize = 24595,
+                PublicId = "Brands/uhgie5vzfq4mo7jfsqih",
+                SecureUrl = "https://res.cloudinary.com/chuabingquan/image/upload/v1483543874/Brands/uhgie5vzfq4mo7jfsqih.jpg",
+                Url = "http://res.cloudinary.com/chuabingquan/image/upload/v1483543874/Brands/uhgie5vzfq4mo7jfsqih.jpg",
+                Version = 1483543874,
+                Width = 202
+            };
+
+            nutripeImg = new BrandPhoto()
+            {
+                BrandId = nutripe.BrandId,
+                CreatedAt = DateTime.Now,
+                Format = "jpg",
+                Height = 179,
+                ImageSize = 30309,
+                PublicId = "Brands/oxriz3emmoyr4crrhryg",
+                SecureUrl = "https://res.cloudinary.com/chuabingquan/image/upload/v1483543912/Brands/oxriz3emmoyr4crrhryg.jpg",
+                Url = "http://res.cloudinary.com/chuabingquan/image/upload/v1483543912/Brands/oxriz3emmoyr4crrhryg.jpg",
+                Version = 1483543912,
+                Width = 202
+            };
+
+
+            db.BrandPhotos.Add(addictionImg);
+            db.BrandPhotos.Add(avodermImg);
+            db.BrandPhotos.Add(boschImg);
+            db.BrandPhotos.Add(dailyDelightImg);
+            db.BrandPhotos.Add(justFishImg);
+            db.BrandPhotos.Add(nutripeImg);
 
             db.SaveChanges();
 
