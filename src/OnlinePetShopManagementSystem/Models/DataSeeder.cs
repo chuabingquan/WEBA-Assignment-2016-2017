@@ -112,30 +112,30 @@ namespace OnlinePetShopManagementSystem.Models
 
             catFood = new Category()
             {
-                CategoryName = "Cat Food",
+                CategoryName = "CAT FOOD",
                 Visibility = 0,
                 IsSpecial = false
             };
 
             dogFood = new Category()
             {
-                CategoryName = "Dog Food",
+                CategoryName = "DOG FOOD",
                 Visibility = 1,
-                StartDate = DateTime.Now,
+                StartDate = DateTime.Now.AddDays(10),
                 EndDate = DateTime.Now.AddDays(30),
                 IsSpecial = false
             };
 
             treats = new Category()
             {
-                CategoryName = "Treats",
+                CategoryName = "TREATS",
                 Visibility = 2,
                 IsSpecial = false
             };
 
             clearance = new Category()
             {
-                CategoryName = "Clearance Sale",
+                CategoryName = "CLEARANCE SALE",
                 Visibility = 2,
                 IsSpecial = true
             };
@@ -152,37 +152,37 @@ namespace OnlinePetShopManagementSystem.Models
 
             addiction = new Brand()
             {
-                BrandName = "Addiction",
+                BrandName = "ADDICTION",
                 NoOfProducts = 3
             };
 
             avoderm = new Brand()
             {
-                BrandName = "Avoderm",
+                BrandName = "AVODERM",
                 NoOfProducts = 2
             };
 
             bosch = new Brand()
             {
-                BrandName = "Bosch",
+                BrandName = "BOSCH",
                 NoOfProducts = 1
             };
 
             dailyDelight = new Brand()
             {
-                BrandName = "Daily Delight",
+                BrandName = "DAILY DELIGHT",
                 NoOfProducts = 1
             };
 
             justFish = new Brand()
             {
-                BrandName = "Just Fish",
+                BrandName = "JUST FISH",
                 NoOfProducts = 1
             };
 
             nutripe = new Brand()
             {
-                BrandName = "Nutripe",
+                BrandName = "NUTRIPE",
                 NoOfProducts = 1
             };
 
